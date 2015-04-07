@@ -4,24 +4,29 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Tutorialzine Node-Webkit Experiment</title>
-
+        <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <!--public-->
         <script src="node_modules/bower_components/jquery/dist/jquery.min.js"></script>
         <script src="node_modules/bower_components/lodash/lodash.min.js"></script>
         <!--angular-->
         <script src="node_modules/bower_components/angular/angular.min.js"></script>
+		<script src="node_modules/bower_components/angular-resource/angular-resource.min.js"></script>
         <script src="node_modules/bower_components/angular-route/angular-route.js"></script>
-
-
         <!--internal-->
-		<script src="public/js/app.js"></script>
+        <script src="public/js/app.js"></script>
     </head>
     <body>
-    	<h2>OpenTSDB Node Webkit</h2>
-    	<ul>
-    		<li><a href="#/settings">Settings</a></li>
-    		<li><a href="#/tsdbversion">TSDB Version</a></li>
-    	</ul>
-        <div class="container" ng-view></div>
+        <div class="container">
+            <div class="masthead">
+                <h3 class="text-muted">OpenTSDB Node Webkit</h3>
+                <nav>
+                    <ul class="nav nav-justified">
+                        <li><a href="#/settings">Settings</a></li>
+                        <li><a href="#/tsdbversion">TSDB Version</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div ng-view></div>
+        </div>
     </body>
 </html>

@@ -13,6 +13,7 @@
     "height": 500
   },
   "dependencies": {
-    "opentsdb_node_client": "file:../../../../var/folders/8m/2gfw1brd4273w2kddz25sggr0000gn/T/npm-2096-bc3a9f1a/git-cache-01cf5bb2e0fd/5c236c2d5d504e8eb76fd96f80dd7ef382e46d34"
+    "opentsdb_node_client": "file:../../../../var/folders/8m/2gfw1brd4273w2kddz25sggr0000gn/T/npm-2509-49d07b3f/git-cache-c211880513d0/03a836ca25586b852ec78a5d0e90adf63bac97f1",
+    "q": "^1.2.0"
   }
 }
