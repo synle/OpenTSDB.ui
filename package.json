@@ -1,0 +1,18 @@
+{
+  "name": "OpenTSDB.ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "window": {
+    "width": 800,
+    "height": 500
+  },
+  "dependencies": {
+    "opentsdb_node_client": "file:../../../../var/folders/8m/2gfw1brd4273w2kddz25sggr0000gn/T/npm-2096-bc3a9f1a/git-cache-01cf5bb2e0fd/5c236c2d5d504e8eb76fd96f80dd7ef382e46d34"
+  }
+}
