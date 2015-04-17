@@ -15,6 +15,13 @@ var Logger = (function() {
 })();
 
 
+var ViewConstant =  {
+    settings : 'public/view/settings.html',
+    tsdbverion : 'public/view/tsdbverion.html',
+    header : 'public/view/common/header.html'
+}
+
+
 //angular
 angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
 .service('AppConfig', function() {
@@ -26,14 +33,9 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     }
     return self;
 })
-.service('ViewConstant', function() {
-    return {
-        settings : 'public/view/settings.html',
-        tsdbverion : 'public/view/tsdbverion.html',
-        header : 'public/view/common/header.html'
-    }
-})
 .service('TsdbClient', function(AppConfig, $http, $q) {
+    var self = {};
+
     var ENDPOINTS = {
         s: '/s',
         aggregators: '/api/aggregators',
@@ -50,14 +52,19 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         uid: '/api/uid',
         version: '/api/version'
     }
-    var self = {};
     var wrapHttpPromise = function(httpFun){
         var defer = $q.defer();
 
         httpFun.then(function(r){
             //success
             if (r.data){
+                //resposne
                 defer.resolve(r.data);
+
+                //slow down response
+                // setTimeout(function(){
+                //     defer.resolve(r.data);
+                // }, 35000);
             }
             else{
                 defer.reject('no data');
@@ -69,7 +76,6 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
 
         return defer.promise;
     }
-
 
     self.version = function() {
         return wrapHttpPromise(
@@ -89,7 +95,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     return self;
 })
 //navs
-.config(function($routeProvider, ViewConstant) {
+.config(function($routeProvider) {
     $routeProvider.when('/settings', {
         controller: 'SettingController',
         templateUrl: ViewConstant.settings
@@ -101,9 +107,8 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     });
 })
 // controllers
-.controller('HeaderController', function($scope, AppConfig, ViewConstant) {
+.controller('HeaderController', function($scope, AppConfig) {
     $scope.templateUrl = ViewConstant.header;
-
 })
 .controller('SettingController', function($scope, AppConfig) {
     $scope.appConfig = AppConfig;
@@ -119,7 +124,12 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     $scope.versions = 'loading';
     $scope.aggregators = 'loading';
     $scope.serializers = 'loading';
+
     $scope.refresh = function() {
+        $scope.versions = 'loading';
+        $scope.aggregators = 'loading';
+        $scope.serializers = 'loading';
+
         TsdbClient.version().then(function(r) {
             $scope.versions = r;
         }, function(r) {
