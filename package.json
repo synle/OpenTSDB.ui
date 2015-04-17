@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "browserify src/js/main.js -o public/js/app.js"
+    "build": "npm run browserify",
+    "test": "mocha test/",
+    "browserify": "browserify src/js/main.js -o public/js/app.js",
+    "lint": "jshint src/js/**/*.js"
   },
   "author": "",
   "license": "ISC",
@@ -20,5 +23,10 @@
     "lodash": "^3.7.0",
     "opentsdb_node_client": "file:../../../../var/folders/8m/2gfw1brd4273w2kddz25sggr0000gn/T/npm-2509-49d07b3f/git-cache-c211880513d0/03a836ca25586b852ec78a5d0e90adf63bac97f1",
     "q": "^1.2.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.8",
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.4"
   }
 }
