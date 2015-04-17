@@ -38,7 +38,8 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
         suggest: '/api/suggest',
         tree: '/api/tree',
         uid: '/api/uid',
-        version: '/api/version'
+        version: '/api/version',
+        log : 'log?json'
     };
     //private methods
     self._getTsdbFullHost = function(config) {
@@ -82,6 +83,11 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
             return $http.get(self.tsdbFullHost + self._ENDPOINTS.serializers);
         });
     };
+    self.log = function() {
+        return self._wrapHttpPromise(function(){
+            return $http.get(self.tsdbFullHost + self._ENDPOINTS.log);
+        });
+    };
     return self;
 })
 //navs
@@ -89,13 +95,20 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     $routeProvider.when('/settings', {
         controller: 'SettingController',
         templateUrl: ViewConstant.settings
-    }).when('/tsdbversion', {
-        controller: 'TsdbVersionController',
-        templateUrl: ViewConstant.tsdbverion
-    }).when('/query', {
+    })
+    .when('/query', {
         controller: 'QueryController',
         templateUrl: ViewConstant.query
-    }).otherwise({
+    })
+    .when('/tsdbversion', {
+        controller: 'TsdbVersionController',
+        templateUrl: ViewConstant.tsdbverion
+    })
+    .when('/tsdblog', {
+        controller: 'TsdbLogController',
+        templateUrl: ViewConstant.tsdblog
+    })
+    .otherwise({
         redirectTo: '/query'
     });
 })
@@ -141,4 +154,21 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
 })
 .controller('QueryController', function($scope, AppConfig) {
     
+})
+.controller('TsdbLogController', function($scope, TsdbClient) {
+    $scope.logs = 'loading';
+
+     $scope.refresh = function() {
+        $scope.logs = 'loading';
+        
+        TsdbClient.log().then(function(r) {
+            $scope.logs = r;
+        }, function(r) {
+            Logger.error('log() failed', r);
+        });
+    }
+
+    //initial
+    $scope.refresh();
 });
+
