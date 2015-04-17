@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "build": "npm run browserify",
+    "build": "npm run build:js",
+    "build:js": "browserify src/js/main.js -o public/js/app.js",
     "test": "mocha test/",
-    "browserify": "browserify src/js/main.js -o public/js/app.js",
     "lint": "jshint src/js/**/*.js"
   },
   "author": "",
