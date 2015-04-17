@@ -2,7 +2,11 @@
 // public
 var $ = require('jquery');
 var _ = require('lodash');
+
+//angular public
 var angular = require('angular');
+require('angular-route');
+require('angular-resource');
 
 
 //mine
@@ -17,6 +21,8 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     self.tsdbPort = '4242';
     return self;
 }).service('TsdbClient', function(AppConfig, $http, $q) {
+    Logger.log('Constructing TsdbClient', AppConfig, $http, $q);
+
     var self = {};
     self._ENDPOINTS = {
         s: '/s',
@@ -40,7 +46,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     };
     self._wrapHttpPromise = function(httpFun) {
         var defer = $q.defer();
-        httpFun.then(function(r) {
+        httpFun().then(function(r) {
             //success
             if (r.data) {
                 //resposne
@@ -62,13 +68,19 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     self.tsdbFullHost = self._getTsdbFullHost(AppConfig);
     //definitinons here
     self.version = function() {
-        self._wrapHttpPromise($http.get(self.tsdbFullHost + self._ENDPOINTS.version));
+        return self._wrapHttpPromise(function(){
+            return $http.get(self.tsdbFullHost + self._ENDPOINTS.version);
+        });
     };
     self.getAggregators = function() {
-        self._wrapHttpPromise($http.get(self.tsdbFullHost + self._ENDPOINTS.aggregators));
+        return self._wrapHttpPromise(function(){
+            return $http.get(self.tsdbFullHost + self._ENDPOINTS.aggregators);
+        });
     };
     self.serializers = function() {
-        self._wrapHttpPromise($http.get(self.tsdbFullHost + self._ENDPOINTS.serializers));
+        return self._wrapHttpPromise(function(){
+            return $http.get(self.tsdbFullHost + self._ENDPOINTS.serializers);
+        });
     };
     return self;
 })
