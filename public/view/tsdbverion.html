@@ -9,21 +9,19 @@
 
 	<div>
 		<h3>Serializer</h3>
-		<div ng-repeat="serializer in serializers track by $index">
+		<div ng-repeat="serializer in serializers">
 			<h4>Serializer #{{$index + 1}}</h4>
 			<div ng-repeat="(key, val) in serializer">
 				<b>{{key}}</b> : 
 				<span ng-switch="key === 'formatters' || key === 'parsers'">
 					<span ng-switch-when="true">
-						<span ng-repeat="v in val">{{v}}<br /></span>
+						<span ng-repeat="v in val track by $index">{{v}}<br /></span>
 					</span>
 					<span ng-switch-when="false">{{val}}</span>
 				</span>
-				
 			</div>
 		</div>
 	</div>
-
 
 	<div>
 		<h3>Aggregator</h3>

@@ -13,16 +13,19 @@ var Logger = (function() {
     }
     return self;
 })();
+
+
 //angular
-angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', function() {
+angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
+.service('AppConfig', function() {
     var self = {};
     self.tsdbHost = 'http://192.168.1.100',
     self.tsdbPort = '4242',
     self.getTsdbFullHost = function() {
-        return self.tsdbHost + ':' + self.tsdbPort +
+        return self.tsdbHost + ':' + self.tsdbPort;
     }
     return self;
-}).service('TsdbClient', function(AppConfig, $http) {
+}).service('TsdbClient', function(AppConfig, $http, $q) {
     var ENDPOINTS = {
         s: '/s',
         aggregators: '/api/aggregators',
@@ -40,14 +43,40 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
         version: '/api/version'
     }
     var self = {};
+    var wrapHttpPromise = function(httpFun){
+        var defer = $q.defer();
+
+        httpFun.then(function(r){
+            //success
+            if (r.data){
+                defer.resolve(r.data);
+            }
+            else{
+                defer.reject('no data');
+            }
+        }, function(err){
+            Logger.error('wrapHttpPromise failed', err)
+            defer.reject(err);
+        });
+
+        return defer.promise;
+    }
+
+
     self.version = function() {
-        return $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.version);
+        return wrapHttpPromise(
+            $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.version)
+        );
     }
     self.getAggregators = function() {
-        return $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.aggregators)
+        return wrapHttpPromise(
+            $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.aggregators)
+        );
     }
     self.serializers = function() {
-        return $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.serializers)
+        return wrapHttpPromise(
+            $http.get(AppConfig.getTsdbFullHost() + ENDPOINTS.serializers)
+        );
     }
     return self;
 }).config(function($routeProvider) {
