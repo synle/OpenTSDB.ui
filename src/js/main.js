@@ -92,8 +92,11 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     }).when('/tsdbversion', {
         controller: 'TsdbVersionController',
         templateUrl: ViewConstant.tsdbverion
+    }).when('/query', {
+        controller: 'QueryController',
+        templateUrl: ViewConstant.query
     }).otherwise({
-        redirectTo: '/settings'
+        redirectTo: '/query'
     });
 })
 // controllers
@@ -135,4 +138,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     };
     //initial
     $scope.refresh();
+})
+.controller('QueryController', function($scope, AppConfig) {
+    
 });

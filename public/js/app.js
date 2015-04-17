@@ -49364,7 +49364,10 @@ return jQuery;
 var self = module.exports = {
     settings: 'public/view/settings.html',
     tsdbverion: 'public/view/tsdbverion.html',
-    header: 'public/view/common/header.html'
+    query: 'public/view/query.html',
+
+    //common stuffs
+    header: 'public/view/common/header.html',
 }
 },{}],10:[function(require,module,exports){
 'use strict';
@@ -49473,8 +49476,11 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     }).when('/tsdbversion', {
         controller: 'TsdbVersionController',
         templateUrl: ViewConstant.tsdbverion
+    }).when('/query', {
+        controller: 'QueryController',
+        templateUrl: ViewConstant.query
     }).otherwise({
-        redirectTo: '/settings'
+        redirectTo: '/query'
     });
 })
 // controllers
@@ -49516,5 +49522,8 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     };
     //initial
     $scope.refresh();
+})
+.controller('QueryController', function($scope, AppConfig) {
+    
 });
 },{"./constant/viewconstant":9,"./lib/logger":10,"angular":6,"angular-resource":2,"angular-route":4,"jquery":7,"lodash":8}]},{},[11]);
