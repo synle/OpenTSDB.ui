@@ -1,0 +1,44 @@
+<div>
+	<h2>Tsdb Settings <button class="btn btn-primary" ng-click="refresh()">Refresh</button></h2>
+	<div ng-switch="versions">
+		<h3>Versions</h3>
+
+		<div ng-switch-when="loading">
+			Loading...
+		</div>
+		<div ng-switch-default ng-repeat="(key, val) in versions">
+			<b>{{key}}</b> : {{val}}
+		</div>
+	</div>
+
+	<div ng-switch="serializers">
+		<h3>Serializer</h3>
+
+		<div ng-switch-when="loading">
+			Loading...
+		</div>
+		<div ng-switch-default ng-repeat="serializer in serializers">
+			<h4>Serializer #{{$index + 1}}</h4>
+			<div ng-repeat="(key, val) in serializer">
+				<b>{{key}}</b> : 
+				<span ng-switch="key === 'formatters' || key === 'parsers'">
+					<span ng-switch-when="true">
+						<span ng-repeat="v in val track by $index">{{v}}<br /></span>
+					</span>
+					<span ng-switch-when="false">{{val}}</span>
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<div ng-switch="aggregators">
+		<h3>Aggregator</h3>
+
+		<div ng-switch-when="loading">
+			Loading...
+		</div>
+		<div ng-switch-default ng-repeat="agg in aggregators track by $index">
+			{{agg}}
+		</div>
+	</div>
+</div>

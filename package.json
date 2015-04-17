@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "build": "npm run build:js",
+    "build": "npm run build:js; npm run build:css; npm run build:html;",
     "build:js": "browserify src/js/main.js -o public/js/app.js",
+    "build:html": "cp -R src/view/* public/view/",
+    "build:css": "cp -R src/css/* public/css/",
+    "clean": "rm -rf public/css/* public/js/* public/view/*",
     "test": "mocha test/",
     "lint": "jshint src/js/**/*.js"
   },
