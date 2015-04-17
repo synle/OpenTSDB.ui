@@ -39,7 +39,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
         tree: '/api/tree',
         uid: '/api/uid',
         version: '/api/version',
-        log : 'log?json'
+        logs : '/logs?json'
     };
     //private methods
     self._getTsdbFullHost = function(config) {
@@ -85,7 +85,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     };
     self.log = function() {
         return self._wrapHttpPromise(function(){
-            return $http.get(self.tsdbFullHost + self._ENDPOINTS.log);
+            return $http.get(self.tsdbFullHost + self._ENDPOINTS.logs);
         });
     };
     return self;
@@ -160,7 +160,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
 
      $scope.refresh = function() {
         $scope.logs = 'loading';
-        
+
         TsdbClient.log().then(function(r) {
             $scope.logs = r;
         }, function(r) {
