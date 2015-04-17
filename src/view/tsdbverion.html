@@ -23,7 +23,7 @@
 				<b>{{key}}</b> : 
 				<span ng-switch="key === 'formatters' || key === 'parsers'">
 					<span ng-switch-when="true">
-						<span ng-repeat="v in val track by $index">{{v}}<br /></span>
+						<span ng-repeat="v in val track by $index">{{v}}, </span>
 					</span>
 					<span ng-switch-when="false">{{val}}</span>
 				</span>
