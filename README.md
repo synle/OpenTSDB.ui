@@ -9,6 +9,12 @@ Dev Dependencies
 	sudo npm install -g mocha jshint browserify mocha
 ```
 
+This depends on Node Webkit, make sure you have it first
+```
+	#Download it here, unzip the file here
+	http://nwjs.io
+```
+
 Script to run
 ```
 	#test
