@@ -25,7 +25,15 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         return self.tsdbHost + ':' + self.tsdbPort;
     }
     return self;
-}).service('TsdbClient', function(AppConfig, $http, $q) {
+})
+.service('ViewConstant', function() {
+    return {
+        settings : 'public/view/settings.html',
+        tsdbverion : 'public/view/tsdbverion.html',
+        header : 'public/view/common/header.html'
+    }
+})
+.service('TsdbClient', function(AppConfig, $http, $q) {
     var ENDPOINTS = {
         s: '/s',
         aggregators: '/api/aggregators',
@@ -79,18 +87,24 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         );
     }
     return self;
-}).config(function($routeProvider) {
+})
+//navs
+.config(function($routeProvider, ViewConstant) {
     $routeProvider.when('/settings', {
         controller: 'SettingController',
-        templateUrl: 'public/view/settings.html'
+        templateUrl: ViewConstant.settings
     }).when('/tsdbversion', {
         controller: 'TsdbVersionController',
-        templateUrl: 'public/view/tsdbverion.html'
+        templateUrl: ViewConstant.tsdbverion
     }).otherwise({
         redirectTo: '/settings'
     });
 })
 // controllers
+.controller('HeaderController', function($scope, AppConfig, ViewConstant) {
+    $scope.templateUrl = ViewConstant.header;
+
+})
 .controller('SettingController', function($scope, AppConfig) {
     $scope.appConfig = AppConfig;
     $scope.origAppConfig = _.cloneDeep(AppConfig);
@@ -102,9 +116,9 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         $scope.appConfig = _.cloneDeep($scope.origAppConfig);
     }
 }).controller('TsdbVersionController', function($scope, TsdbClient) {
-    $scope.versions = {};
-    $scope.aggregators = {};
-    $scope.serializers = {};
+    $scope.versions = 'loading';
+    $scope.aggregators = 'loading';
+    $scope.serializers = 'loading';
     $scope.refresh = function() {
         TsdbClient.version().then(function(r) {
             $scope.versions = r;

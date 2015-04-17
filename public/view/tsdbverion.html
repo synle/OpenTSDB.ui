@@ -2,8 +2,11 @@
 	<h2>Tsdb Settings <button class="btn btn-primary" ng-click="refresh()">Refresh</button></h2>
 	<div>
 		<h3>Versions</h3>
-		<div ng-repeat="(key, val) in versions">
+		<div ng-if="versions !== 'loading'" ng-repeat="(key, val) in versions">
 			<b>{{key}}</b> : {{val}}
+		</div>
+		<div ng-if="versions === 'loading'">
+			Loading...
 		</div>
 	</div>
 

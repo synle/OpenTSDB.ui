@@ -17,15 +17,10 @@
     </head>
     <body>
         <div class="container">
-            <div class="masthead">
-                <h3 class="text-muted">OpenTSDB Node Webkit</h3>
-                <nav>
-                    <ul class="nav nav-justified">
-                        <li><a href="#/settings">Settings</a></li>
-                        <li><a href="#/tsdbversion">TSDB Version</a></li>
-                    </ul>
-                </nav>
-            </div>
+            <!--header-->
+            <div ng-controller="HeaderController" title="{{aaa}}" ng-include="'public/view/common/header.html'"></div>
+
+            <!--body-->
             <div ng-view></div>
         </div>
     </body>
