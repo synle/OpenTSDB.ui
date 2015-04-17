@@ -1,5 +1,5 @@
-//public
-var Q = require('q');
+'use strict';
+
 //mine
 var Logger = (function() {
     var self = {};
@@ -77,21 +77,17 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     $scope.aggregators = {};
     $scope.serializers = {};
     $scope.refresh = function() {
-        //get version
         TsdbClient.version().then(function(r) {
-            //success
             $scope.versions = r;
         }, function(r) {
             Logger.error('getVersion() failed', r)
         });
         TsdbClient.getAggregators().then(function(r) {
-            //success
             $scope.aggregators = r;
         }, function(r) {
             Logger.error('getAggregators() failed', r)
         });
         TsdbClient.serializers().then(function(r) {
-            //success
             $scope.serializers = r;
         }, function(r) {
             Logger.error('serializers() failed', r)
