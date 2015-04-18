@@ -17,7 +17,9 @@ var ViewConstant = require('./constant/viewconstant');
 
 
 //angular
-angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', function() {
+angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
+//services
+.service('AppConfig', function() {
     var self = {};
     self.tsdbHost = 'http://192.168.1.100',
     self.tsdbPort = '4242';
@@ -101,6 +103,20 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     }
     return self;
 })
+.service('ChartNormalizer', function(){
+    //this needs to normalize data and config
+    var self = {};
+
+    self.normalizeConfig = function(tsdbData, styleConfig){
+
+    }
+
+    self.normalizeData = function(tsdbData){
+
+    }
+
+    return self;
+})
 //navs
 .config(function($routeProvider) {
     $routeProvider.when('/settings', {
@@ -168,7 +184,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     $scope.tsdbData = [];
 
     $scope.save = function(){
-        
+
     }
 
     $scope.render = function(){
