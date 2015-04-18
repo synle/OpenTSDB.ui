@@ -77,7 +77,7 @@
 
 	<!--chart-->
 	<div>
-		<h3>Chart Data</h3><br />
-		<pre ng-if="data">{{data}}</pre>
+		<h3>Chart Data</h3> <button class="btn btn-primary" ng-click="render()">Render</button><br />
+		<pre ng-if="tsdbData && tsdbData.length > 0">{{tsdbData}}</pre>
 	</div>
 </div>

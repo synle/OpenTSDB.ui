@@ -13,6 +13,8 @@ require('angular-resource');
 var Logger = require('./lib/logger');
 var ViewConstant = require('./constant/viewconstant');
 
+//my angular
+
 
 //angular
 angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', function() {
@@ -88,6 +90,15 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
             return $http.get(self.tsdbFullHost + self._ENDPOINTS.logs);
         });
     };
+
+    self.query = function(requestData){
+        return self._wrapHttpPromise(function(){
+            return $http.post(
+                self.tsdbFullHost + self._ENDPOINTS.query,
+                requestData
+            );
+        });  
+    }
     return self;
 })
 //navs
@@ -152,8 +163,23 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource']).service('AppConfig', fun
     //initial
     $scope.refresh();
 })
-.controller('QueryController', function($scope, AppConfig) {
-    
+.controller('QueryController', function($scope, TsdbClient) {
+    $scope.query = {"start":"1428768937000","end":"1429373737000","queries":[{"aggregator":"zimsum","metric":"proc.loadavg.15min","rate":false,"tags":{},"downsample":"60m-avg"},{"aggregator":"zimsum","metric":"proc.loadavg.1min","rate":false,"tags":{},"downsample":"60m-avg"},{"aggregator":"zimsum","metric":"proc.loadavg.5min","rate":false,"tags":{},"downsample":"60m-avg"}]};
+    $scope.tsdbData = [];
+
+    $scope.save = function(){
+        
+    }
+
+    $scope.render = function(){
+        TsdbClient.query(
+            $scope.query
+        ).then(function(r){
+            $scope.tsdbData = r;
+        }, function(r){
+            Logger.error('query() failed', r);
+        });
+    }
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
     $scope.logs = 'loading';
