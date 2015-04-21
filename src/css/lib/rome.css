@@ -1,63 +1,3 @@
-.sey-list {
-  display: none;
-  position: absolute;
-  padding: 0;
-  margin-right: 10px;
-  list-style-type: none;
-  box-shadow: 1px 2px 6px;
-  background-color: #fff;
-  color: #333;
-  transition: left 0.1s ease-in-out;
-}
-.sey-show {
-  display: block;
-}
-.sey-hide {
-  display: none;
-}
-.sey-item {
-  cursor: pointer;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  padding: 7px;
-}
-.sey-item:hover {
-  background-color: #444;
-  color: #fff;
-}
-.sey-selected {
-  background-color: #333;
-  color: #fff;
-}
-
-.nsg-editor {
-  padding: 10px;
-  cursor: text;
-}
-.nsg-tag {
-  display: inline-block;
-  border: 1px solid #666;
-  padding: 3px;
-  margin: 4px;
-}
-.nsg-tag-remove:after {
-  margin-left: 4px;
-  padding: 0 4px;
-  content: 'x';
-  background-color: #ccc;
-  cursor: pointer;
-}
-.nsg-input {
-  -webkit-transition: width 0.25s;
-  -moz-transition: width 0.25s;
-  -o-transition: width 0.25s;
-  -ms-transition: width 0.25s;
-  transition: width 0.25s;
-  padding: 3px;
-  margin: 5px 0;
-}
-
 /**
  * rome - Customizable date (and time) picker. Opt-in UI, no jQuery!
  * @version v2.1.16
@@ -152,4 +92,3 @@
 .rd-day-concealed {
   visibility: hidden;
 }
-

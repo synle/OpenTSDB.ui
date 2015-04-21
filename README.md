@@ -6,7 +6,7 @@ This is visioned as a replacement for built-in OpenTSDB gui tool. This will allo
 
 Dev Dependencies
 ```
-	sudo npm install -g mocha jshint browserify mocha
+	sudo npm install -g gulp
 ```
 
 This depends on Node Webkit, make sure you have it first
