@@ -8,7 +8,7 @@
     "build:js": "gulp js",
     "build:html": "gulp html",
     "build:css": "gulp css",
-    "dev": "",
+    "dev": "gulp watch",
     "clean": "gulp clean",
     "test": "mocha test/",
     "lint": "jshint src/js/**/*.js"
@@ -36,6 +36,7 @@
     "gulp-browserify": "^0.5.1",
     "gulp-clean": "^0.3.1",
     "gulp-concat": "^2.5.2",
+    "gulp-livereload": "^3.8.0",
     "gulp-rename": "^1.2.2"
   }
 }
