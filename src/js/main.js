@@ -3,7 +3,10 @@
 window.$ = require('jquery');
 window._ = require('lodash');
 window.moment = require('moment');
-window.rome = require('rome/dist/rome.standalone.min.js');
+window.rome = require('rome/dist/rome.standalone.min.js');//date picker
+window.insignia = require('insignia/dist/insignia.min.js');//tag list
+window.horsey = require('horsey/dist/horsey.min.js');//autocomplete
+
 
 //angular public
 var angular = require('angular');
