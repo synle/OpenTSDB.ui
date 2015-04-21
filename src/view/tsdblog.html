@@ -1,0 +1,9 @@
+<div ng-switch="logs">
+	<h3>Tsdb Logs <button class="btn btn-primary" ng-click="refresh()">Refresh</button></h3>
+	<div ng-switch-when="loading">
+		Loading...
+	</div>
+	<div ng-switch-default ng-repeat="log in logs track by $index">
+		{{log}}<br />
+	</div>
+</div>

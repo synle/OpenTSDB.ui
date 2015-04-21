@@ -1,7 +1,9 @@
 // 'use strict';
 // public
-var $ = require('jquery');
-var _ = require('lodash');
+window.$ = require('jquery');
+window._ = require('lodash');
+window.moment = require('moment');
+window.rome = require('rome/dist/rome.standalone.min.js');
 
 //angular public
 var angular = require('angular');
@@ -13,10 +15,8 @@ require('angular-resource');
 var Logger = require('./lib/logger');
 var ViewConstant = require('./constant/viewconstant');
 
+
 //my angular
-
-
-//angular
 angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
 //services
 .service('AppConfig', function() {
@@ -103,7 +103,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     }
     return self;
 })
-.service('ChartNormalizer', function(){
+.service('ChartJsNormalizer', function(){
     //this needs to normalize data and config
     var self = {};
 
