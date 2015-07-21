@@ -18,11 +18,13 @@ require('angular-resource');
 
 //mine
 var Logger = require('./lib/logger');
+var GraphNormalizer = require('./lib/graphnormalizer.js');
 var ViewConstant = require('./constant/viewconstant');
-
+var Constant = require('./constant/constant');
 
 //my angular
-angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
+angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
+
 //services
 .service('AppConfig', function() {
     return origAppConfig;
@@ -30,23 +32,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     Logger.log('Constructing TsdbClient', AppConfig, $http, $q);
 
     var self = {};
-    self._ENDPOINTS = {
-        s: '/s',
-        aggregators: '/api/aggregators',
-        annotation: '/api/annotation',
-        config: '/api/config',
-        dropcaches: '/api/dropcaches',
-        put: '/api/put',
-        query: '/api/query',
-        search: '/api/search',
-        serializers: '/api/serializers',
-        stats: '/api/stats',
-        suggest: '/api/suggest',
-        tree: '/api/tree',
-        uid: '/api/uid',
-        version: '/api/version',
-        logs : '/logs?json'
-    };
+    self._ENDPOINTS = Constant.TSDB_ENDPOINTS;
     //private methods
     self._getTsdbFullHost = function(config) {
         return config.tsdbHost + ':' + config.tsdbPort;
@@ -129,9 +115,9 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         controller: 'QueryController',
         templateUrl: ViewConstant.query
     })
-    .when('/tsdbversion', {
-        controller: 'TsdbVersionController',
-        templateUrl: ViewConstant.tsdbverion
+    .when('/tsdbsettings', {
+        controller: 'TsdbSettingsController',
+        templateUrl: ViewConstant.tsdbsettings
     })
     .when('/tsdblog', {
         controller: 'TsdbLogController',
@@ -154,7 +140,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
     $scope.cancel = function() {
         $scope.appConfig = _.cloneDeep($scope.origAppConfig);
     };
-}).controller('TsdbVersionController', function($scope, TsdbClient) {
+}).controller('TsdbSettingsController', function($scope, TsdbClient) {
     $scope.versions = 'loading';
     $scope.aggregators = 'loading';
     $scope.serializers = 'loading';
@@ -197,6 +183,16 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
         }, function(r){
             Logger.error('query() failed', r);
         });
+    }
+
+    //dummy chart data
+    $scope.chartistData = {
+      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      series: [
+        [12, 9, 7, 8, 5],
+        [2, 1, 3.5, 7, 3],
+        [1, 3, 4, 5, 6]
+      ]
     }
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
