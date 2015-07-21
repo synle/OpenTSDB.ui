@@ -33,7 +33,10 @@ gulp.task('js', function() {
 
 gulp.task('css', function() {
     return gulp.src(
-            ['src/css/lib/*', 'src/css/main.css']
+            [
+                'src/css/lib/*',
+                'src/css/main.css'
+            ]
         ).pipe(concat('app.css'))
         .pipe(gulp.dest('./public/css'));
 });
