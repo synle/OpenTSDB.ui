@@ -1,4 +1,6 @@
 // 'use strict';
+var origAppConfig = require('./appconfig');
+
 // public
 window.$ = require('jquery');
 window._ = require('lodash');
@@ -23,10 +25,7 @@ var ViewConstant = require('./constant/viewconstant');
 angular.module('opentsdbnw', ['ngRoute', 'ngResource'])
 //services
 .service('AppConfig', function() {
-    var self = {};
-    self.tsdbHost = 'http://192.168.1.100',
-    self.tsdbPort = '4242';
-    return self;
+    return origAppConfig;
 }).service('TsdbClient', function(AppConfig, $http, $q) {
     Logger.log('Constructing TsdbClient', AppConfig, $http, $q);
 
