@@ -14,6 +14,7 @@ window.horsey = require('horsey/dist/horsey.min.js');//autocomplete
 var angular = require('angular');
 require('angular-route');
 require('angular-resource');
+require('angular-chartist.js/dist/angular-chartist.min.js');
 
 
 //mine
@@ -194,6 +195,13 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
         [1, 3, 4, 5, 6]
       ]
     }
+
+    $scope.chartistOption = {
+        fullWidth: true,
+        chartPadding: {
+            right: 40
+        }
+    };
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
     $scope.logs = 'loading';

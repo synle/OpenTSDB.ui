@@ -1,4 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(t,e){"function"==typeof define&&define.amd?define(["angular","chartist"],e):"object"==typeof exports?module.exports=e(require("angular"),require("chartist")):t.angularChartist=e(t.angular,t.Chartist)}(this,function(t,e){"use strict";function n(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function r(){return{restrict:"EA",scope:{data:"=chartistData",chartType:"@chartistChartType",events:"&chartistEvents",chartOptions:"&chartistChartOptions",responsiveOptions:"&chartistResponsiveOptions"},controller:"AngularChartistCtrl",link:function(t,e,n,r){r.element=e[0]}}}var i=function(){function t(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}return function(e,n,r){return n&&t(e.prototype,n),r&&t(e,r),e}}(),a=function(){function t(e){var r=this;n(this,t),this.data=e.data,this.chartType=e.chartType,this.events=e.events()||{},this.options=e.chartOptions()||null,this.responsiveOptions=e.responsiveOptions()||null,e.$watch(function(){return{data:e.data,chartType:e.chartType,chartOptions:e.chartOptions()}},this.update.bind(this),!0),e.$on("$destroy",function(){r.chart&&r.chart.detach()})}return i(t,[{key:"bindEvents",value:function(){var t=this;Object.keys(this.events).forEach(function(e){t.chart.on(e,t.events[e])})}},{key:"renderChart",value:function(){return this.data?(this.chart=e[this.chartType](this.element,this.data,this.options,this.responsiveOptions),this.bindEvents(),this.chart):void 0}},{key:"update",value:function(t,e){this.chartType=t.chartType,this.data=t.data,this.options=t.chartOptions,this.chart&&t.chartType===e.chartType?this.chart.update(this.data,this.options):this.renderChart()}},{key:"element",set:function(t){this._element=t,this.renderChart()},get:function(){return this._element}}]),t}();a.$inject=["$scope"],r.$inject=[];var s=t.module("angular-chartist",[]).controller("AngularChartistCtrl",a).directive("chartist",r);return s});
+},{"angular":7,"chartist":8}],2:[function(require,module,exports){
 /**
  * @license AngularJS v1.3.15
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -668,11 +670,11 @@ angular.module('ngResource', ['ng']).
 
 })(window, window.angular);
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 require('./angular-resource');
 module.exports = 'ngResource';
 
-},{"./angular-resource":1}],3:[function(require,module,exports){
+},{"./angular-resource":2}],4:[function(require,module,exports){
 /**
  * @license AngularJS v1.3.15
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -1663,11 +1665,11 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 })(window, window.angular);
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 require('./angular-route');
 module.exports = 'ngRoute';
 
-},{"./angular-route":3}],5:[function(require,module,exports){
+},{"./angular-route":4}],6:[function(require,module,exports){
 /**
  * @license AngularJS v1.3.15
  * (c) 2010-2014 Google, Inc. http://angularjs.org
@@ -27977,19 +27979,4024 @@ var minlengthDirective = function() {
 })(window, document);
 
 !window.angular.$$csp() && window.angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}</style>');
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 require('./angular');
 module.exports = angular;
 
-},{"./angular":5}],7:[function(require,module,exports){
+},{"./angular":6}],8:[function(require,module,exports){
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define([], function () {
+      return (root['Chartist'] = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    root['Chartist'] = factory();
+  }
+}(this, function () {
+
+/* Chartist.js 0.9.1
+ * Copyright © 2015 Gion Kunz
+ * Free to use under the WTFPL license.
+ * http://www.wtfpl.net/
+ */
+/**
+ * The core module of Chartist that is mainly providing static functions and higher level functions for chart modules.
+ *
+ * @module Chartist.Core
+ */
+var Chartist = {
+  version: '0.9.1'
+};
+
+(function (window, document, Chartist) {
+  'use strict';
+
+  /**
+   * Helps to simplify functional style code
+   *
+   * @memberof Chartist.Core
+   * @param {*} n This exact value will be returned by the noop function
+   * @return {*} The same value that was provided to the n parameter
+   */
+  Chartist.noop = function (n) {
+    return n;
+  };
+
+  /**
+   * Generates a-z from a number 0 to 26
+   *
+   * @memberof Chartist.Core
+   * @param {Number} n A number from 0 to 26 that will result in a letter a-z
+   * @return {String} A character from a-z based on the input number n
+   */
+  Chartist.alphaNumerate = function (n) {
+    // Limit to a-z
+    return String.fromCharCode(97 + n % 26);
+  };
+
+  /**
+   * Simple recursive object extend
+   *
+   * @memberof Chartist.Core
+   * @param {Object} target Target object where the source will be merged into
+   * @param {Object...} sources This object (objects) will be merged into target and then target is returned
+   * @return {Object} An object that has the same reference as target but is extended and merged with the properties of source
+   */
+  Chartist.extend = function (target) {
+    target = target || {};
+
+    var sources = Array.prototype.slice.call(arguments, 1);
+    sources.forEach(function(source) {
+      for (var prop in source) {
+        if (typeof source[prop] === 'object' && source[prop] !== null && !(source[prop] instanceof Array)) {
+          target[prop] = Chartist.extend({}, target[prop], source[prop]);
+        } else {
+          target[prop] = source[prop];
+        }
+      }
+    });
+
+    return target;
+  };
+
+  /**
+   * Replaces all occurrences of subStr in str with newSubStr and returns a new string.
+   *
+   * @memberof Chartist.Core
+   * @param {String} str
+   * @param {String} subStr
+   * @param {String} newSubStr
+   * @return {String}
+   */
+  Chartist.replaceAll = function(str, subStr, newSubStr) {
+    return str.replace(new RegExp(subStr, 'g'), newSubStr);
+  };
+
+  /**
+   * Converts a string to a number while removing the unit if present. If a number is passed then this will be returned unmodified.
+   *
+   * @memberof Chartist.Core
+   * @param {String|Number} value
+   * @return {Number} Returns the string as number or NaN if the passed length could not be converted to pixel
+   */
+  Chartist.stripUnit = function(value) {
+    if(typeof value === 'string') {
+      value = value.replace(/[^0-9\+-\.]/g, '');
+    }
+
+    return +value;
+  };
+
+  /**
+   * Converts a number to a string with a unit. If a string is passed then this will be returned unmodified.
+   *
+   * @memberof Chartist.Core
+   * @param {Number} value
+   * @param {String} unit
+   * @return {String} Returns the passed number value with unit.
+   */
+  Chartist.ensureUnit = function(value, unit) {
+    if(typeof value === 'number') {
+      value = value + unit;
+    }
+
+    return value;
+  };
+
+  /**
+   * This is a wrapper around document.querySelector that will return the query if it's already of type Node
+   *
+   * @memberof Chartist.Core
+   * @param {String|Node} query The query to use for selecting a Node or a DOM node that will be returned directly
+   * @return {Node}
+   */
+  Chartist.querySelector = function(query) {
+    return query instanceof Node ? query : document.querySelector(query);
+  };
+
+  /**
+   * Functional style helper to produce array with given length initialized with undefined values
+   *
+   * @memberof Chartist.Core
+   * @param length
+   * @return {Array}
+   */
+  Chartist.times = function(length) {
+    return Array.apply(null, new Array(length));
+  };
+
+  /**
+   * Sum helper to be used in reduce functions
+   *
+   * @memberof Chartist.Core
+   * @param previous
+   * @param current
+   * @return {*}
+   */
+  Chartist.sum = function(previous, current) {
+    return previous + (current ? current : 0);
+  };
+
+  /**
+   * Multiply helper to be used in `Array.map` for multiplying each value of an array with a factor.
+   *
+   * @memberof Chartist.Core
+   * @param {Number} factor
+   * @returns {Function} Function that can be used in `Array.map` to multiply each value in an array
+   */
+  Chartist.mapMultiply = function(factor) {
+    return function(num) {
+      return num * factor;
+    };
+  };
+
+  /**
+   * Add helper to be used in `Array.map` for adding a addend to each value of an array.
+   *
+   * @memberof Chartist.Core
+   * @param {Number} addend
+   * @returns {Function} Function that can be used in `Array.map` to add a addend to each value in an array
+   */
+  Chartist.mapAdd = function(addend) {
+    return function(num) {
+      return num + addend;
+    };
+  };
+
+  /**
+   * Map for multi dimensional arrays where their nested arrays will be mapped in serial. The output array will have the length of the largest nested array. The callback function is called with variable arguments where each argument is the nested array value (or undefined if there are no more values).
+   *
+   * @memberof Chartist.Core
+   * @param arr
+   * @param cb
+   * @return {Array}
+   */
+  Chartist.serialMap = function(arr, cb) {
+    var result = [],
+        length = Math.max.apply(null, arr.map(function(e) {
+          return e.length;
+        }));
+
+    Chartist.times(length).forEach(function(e, index) {
+      var args = arr.map(function(e) {
+        return e[index];
+      });
+
+      result[index] = cb.apply(null, args);
+    });
+
+    return result;
+  };
+
+  /**
+   * This helper function can be used to round values with certain precision level after decimal. This is used to prevent rounding errors near float point precision limit.
+   *
+   * @memberof Chartist.Core
+   * @param {Number} value The value that should be rounded with precision
+   * @param {Number} [digits] The number of digits after decimal used to do the rounding
+   * @returns {number} Rounded value
+   */
+  Chartist.roundWithPrecision = function(value, digits) {
+    var precision = Math.pow(10, digits || Chartist.precision);
+    return Math.round(value * precision) / precision;
+  };
+
+  /**
+   * Precision level used internally in Chartist for rounding. If you require more decimal places you can increase this number.
+   *
+   * @memberof Chartist.Core
+   * @type {number}
+   */
+  Chartist.precision = 8;
+
+  /**
+   * A map with characters to escape for strings to be safely used as attribute values.
+   *
+   * @memberof Chartist.Core
+   * @type {Object}
+   */
+  Chartist.escapingMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#039;'
+  };
+
+  /**
+   * This function serializes arbitrary data to a string. In case of data that can't be easily converted to a string, this function will create a wrapper object and serialize the data using JSON.stringify. The outcoming string will always be escaped using Chartist.escapingMap.
+   * If called with null or undefined the function will return immediately with null or undefined.
+   *
+   * @memberof Chartist.Core
+   * @param {Number|String|Object} data
+   * @return {String}
+   */
+  Chartist.serialize = function(data) {
+    if(data === null || data === undefined) {
+      return data;
+    } else if(typeof data === 'number') {
+      data = ''+data;
+    } else if(typeof data === 'object') {
+      data = JSON.stringify({data: data});
+    }
+
+    return Object.keys(Chartist.escapingMap).reduce(function(result, key) {
+      return Chartist.replaceAll(result, key, Chartist.escapingMap[key]);
+    }, data);
+  };
+
+  /**
+   * This function de-serializes a string previously serialized with Chartist.serialize. The string will always be unescaped using Chartist.escapingMap before it's returned. Based on the input value the return type can be Number, String or Object. JSON.parse is used with try / catch to see if the unescaped string can be parsed into an Object and this Object will be returned on success.
+   *
+   * @memberof Chartist.Core
+   * @param {String} data
+   * @return {String|Number|Object}
+   */
+  Chartist.deserialize = function(data) {
+    if(typeof data !== 'string') {
+      return data;
+    }
+
+    data = Object.keys(Chartist.escapingMap).reduce(function(result, key) {
+      return Chartist.replaceAll(result, Chartist.escapingMap[key], key);
+    }, data);
+
+    try {
+      data = JSON.parse(data);
+      data = data.data !== undefined ? data.data : data;
+    } catch(e) {}
+
+    return data;
+  };
+
+  /**
+   * Create or reinitialize the SVG element for the chart
+   *
+   * @memberof Chartist.Core
+   * @param {Node} container The containing DOM Node object that will be used to plant the SVG element
+   * @param {String} width Set the width of the SVG element. Default is 100%
+   * @param {String} height Set the height of the SVG element. Default is 100%
+   * @param {String} className Specify a class to be added to the SVG element
+   * @return {Object} The created/reinitialized SVG element
+   */
+  Chartist.createSvg = function (container, width, height, className) {
+    var svg;
+
+    width = width || '100%';
+    height = height || '100%';
+
+    // Check if there is a previous SVG element in the container that contains the Chartist XML namespace and remove it
+    // Since the DOM API does not support namespaces we need to manually search the returned list http://www.w3.org/TR/selectors-api/
+    Array.prototype.slice.call(container.querySelectorAll('svg')).filter(function filterChartistSvgObjects(svg) {
+      return svg.getAttributeNS('http://www.w3.org/2000/xmlns/', Chartist.xmlNs.prefix);
+    }).forEach(function removePreviousElement(svg) {
+      container.removeChild(svg);
+    });
+
+    // Create svg object with width and height or use 100% as default
+    svg = new Chartist.Svg('svg').attr({
+      width: width,
+      height: height
+    }).addClass(className).attr({
+      style: 'width: ' + width + '; height: ' + height + ';'
+    });
+
+    // Add the DOM node to our container
+    container.appendChild(svg._node);
+
+    return svg;
+  };
+
+
+  /**
+   * Reverses the series, labels and series data arrays.
+   *
+   * @memberof Chartist.Core
+   * @param data
+   */
+  Chartist.reverseData = function(data) {
+    data.labels.reverse();
+    data.series.reverse();
+    for (var i = 0; i < data.series.length; i++) {
+      if(typeof(data.series[i]) === 'object' && data.series[i].data !== undefined) {
+        data.series[i].data.reverse();
+      } else if(data.series[i] instanceof Array) {
+        data.series[i].reverse();
+      }
+    }
+  };
+
+  /**
+   * Convert data series into plain array
+   *
+   * @memberof Chartist.Core
+   * @param {Object} data The series object that contains the data to be visualized in the chart
+   * @param {Boolean} reverse If true the whole data is reversed by the getDataArray call. This will modify the data object passed as first parameter. The labels as well as the series order is reversed. The whole series data arrays are reversed too.
+   * @param {Boolean} multi Create a multi dimensional array from a series data array where a value object with `x` and `y` values will be created.
+   * @return {Array} A plain array that contains the data to be visualized in the chart
+   */
+  Chartist.getDataArray = function (data, reverse, multi) {
+    // If the data should be reversed but isn't we need to reverse it
+    // If it's reversed but it shouldn't we need to reverse it back
+    // That's required to handle data updates correctly and to reflect the responsive configurations
+    if(reverse && !data.reversed || !reverse && data.reversed) {
+      Chartist.reverseData(data);
+      data.reversed = !data.reversed;
+    }
+
+    // Recursively walks through nested arrays and convert string values to numbers and objects with value properties
+    // to values. Check the tests in data core -> data normalization for a detailed specification of expected values
+    function recursiveConvert(value) {
+      if(Chartist.isFalseyButZero(value)) {
+        // This is a hole in data and we should return undefined
+        return undefined;
+      } else if((value.data || value) instanceof Array) {
+        return (value.data || value).map(recursiveConvert);
+      } else if(value.hasOwnProperty('value')) {
+        return recursiveConvert(value.value);
+      } else {
+        if(multi) {
+          return {
+            x: Chartist.getNumberOrUndefined(value.x),
+            // Single series value arrays are assumed to specify the Y-Axis value
+            // For example: [1, 2] => [{x: undefined, y: 1}, {x: undefined, y: 2}]
+            y: value.hasOwnProperty('y') ? Chartist.getNumberOrUndefined(value.y) : Chartist.getNumberOrUndefined(value)
+          };
+        } else {
+          return Chartist.getNumberOrUndefined(value);
+        }
+      }
+    }
+
+    return data.series.map(recursiveConvert);
+  };
+
+  /**
+   * Converts a number into a padding object.
+   *
+   * @memberof Chartist.Core
+   * @param {Object|Number} padding
+   * @param {Number} [fallback] This value is used to fill missing values if a incomplete padding object was passed
+   * @returns {Object} Returns a padding object containing top, right, bottom, left properties filled with the padding number passed in as argument. If the argument is something else than a number (presumably already a correct padding object) then this argument is directly returned.
+   */
+  Chartist.normalizePadding = function(padding, fallback) {
+    fallback = fallback || 0;
+
+    return typeof padding === 'number' ? {
+      top: padding,
+      right: padding,
+      bottom: padding,
+      left: padding
+    } : {
+      top: typeof padding.top === 'number' ? padding.top : fallback,
+      right: typeof padding.right === 'number' ? padding.right : fallback,
+      bottom: typeof padding.bottom === 'number' ? padding.bottom : fallback,
+      left: typeof padding.left === 'number' ? padding.left : fallback
+    };
+  };
+
+  Chartist.getMetaData = function(series, index) {
+    var value = series.data ? series.data[index] : series[index];
+    return value ? Chartist.serialize(value.meta) : undefined;
+  };
+
+  /**
+   * Calculate the order of magnitude for the chart scale
+   *
+   * @memberof Chartist.Core
+   * @param {Number} value The value Range of the chart
+   * @return {Number} The order of magnitude
+   */
+  Chartist.orderOfMagnitude = function (value) {
+    return Math.floor(Math.log(Math.abs(value)) / Math.LN10);
+  };
+
+  /**
+   * Project a data length into screen coordinates (pixels)
+   *
+   * @memberof Chartist.Core
+   * @param {Object} axisLength The svg element for the chart
+   * @param {Number} length Single data value from a series array
+   * @param {Object} bounds All the values to set the bounds of the chart
+   * @return {Number} The projected data length in pixels
+   */
+  Chartist.projectLength = function (axisLength, length, bounds) {
+    return length / bounds.range * axisLength;
+  };
+
+  /**
+   * Get the height of the area in the chart for the data series
+   *
+   * @memberof Chartist.Core
+   * @param {Object} svg The svg element for the chart
+   * @param {Object} options The Object that contains all the optional values for the chart
+   * @return {Number} The height of the area in the chart for the data series
+   */
+  Chartist.getAvailableHeight = function (svg, options) {
+    return Math.max((Chartist.stripUnit(options.height) || svg.height()) - (options.chartPadding.top +  options.chartPadding.bottom) - options.axisX.offset, 0);
+  };
+
+  /**
+   * Get highest and lowest value of data array. This Array contains the data that will be visualized in the chart.
+   *
+   * @memberof Chartist.Core
+   * @param {Array} data The array that contains the data to be visualized in the chart
+   * @param {Object} options The Object that contains all the optional values for the chart
+   * @param {String} dimension Axis dimension 'x' or 'y' used to access the correct value and high / low configuration
+   * @return {Object} An object that contains the highest and lowest value that will be visualized on the chart.
+   */
+  Chartist.getHighLow = function (data, options, dimension) {
+    // TODO: Remove workaround for deprecated global high / low config. Axis high / low configuration is preferred
+    options = Chartist.extend({}, options, dimension ? options['axis' + dimension.toUpperCase()] : {});
+
+    var highLow = {
+        high: options.high === undefined ? -Number.MAX_VALUE : +options.high,
+        low: options.low === undefined ? Number.MAX_VALUE : +options.low
+      },
+      findHigh = options.high === undefined,
+      findLow = options.low === undefined;
+
+    // Function to recursively walk through arrays and find highest and lowest number
+    function recursiveHighLow(data) {
+      if(data === undefined) {
+        return undefined;
+      } else if(data instanceof Array) {
+        for (var i = 0; i < data.length; i++) {
+          recursiveHighLow(data[i]);
+        }
+      } else {
+        var value = dimension ? +data[dimension] : +data;
+
+        if (findHigh && value > highLow.high) {
+          highLow.high = value;
+        }
+
+        if (findLow && value < highLow.low) {
+          highLow.low = value;
+        }
+      }
+    }
+
+    // Start to find highest and lowest number recursively
+    if(findHigh || findLow) {
+      recursiveHighLow(data);
+    }
+
+    // If high and low are the same because of misconfiguration or flat data (only the same value) we need
+    // to set the high or low to 0 depending on the polarity
+    if (highLow.high <= highLow.low) {
+      // If both values are 0 we set high to 1
+      if (highLow.low === 0) {
+        highLow.high = 1;
+      } else if (highLow.low < 0) {
+        // If we have the same negative value for the bounds we set bounds.high to 0
+        highLow.high = 0;
+      } else {
+        // If we have the same positive value for the bounds we set bounds.low to 0
+        highLow.low = 0;
+      }
+    }
+
+    return highLow;
+  };
+
+  /**
+   * Checks if the value is a valid number or string with a number.
+   *
+   * @memberof Chartist.Core
+   * @param value
+   * @returns {Boolean}
+   */
+  Chartist.isNum = function(value) {
+    return !isNaN(value) && isFinite(value);
+  };
+
+  /**
+   * Returns true on all falsey values except the numeric value 0.
+   *
+   * @memberof Chartist.Core
+   * @param value
+   * @returns {boolean}
+   */
+  Chartist.isFalseyButZero = function(value) {
+    return !value && value !== 0;
+  };
+
+  /**
+   * Returns a number if the passed parameter is a valid number or the function will return undefined. On all other values than a valid number, this function will return undefined.
+   *
+   * @memberof Chartist.Core
+   * @param value
+   * @returns {*}
+   */
+  Chartist.getNumberOrUndefined = function(value) {
+    return isNaN(+value) ? undefined : +value;
+  };
+
+  /**
+   * Gets a value from a dimension `value.x` or `value.y` while returning value directly if it's a valid numeric value. If the value is not numeric and it's falsey this function will return undefined.
+   *
+   * @param value
+   * @param dimension
+   * @returns {*}
+   */
+  Chartist.getMultiValue = function(value, dimension) {
+    if(Chartist.isNum(value)) {
+      return +value;
+    } else if(value) {
+      return value[dimension] || 0;
+    } else {
+      return 0;
+    }
+  };
+
+  /**
+   * Pollard Rho Algorithm to find smallest factor of an integer value. There are more efficient algorithms for factorization, but this one is quite efficient and not so complex.
+   *
+   * @memberof Chartist.Core
+   * @param {Number} num An integer number where the smallest factor should be searched for
+   * @returns {Number} The smallest integer factor of the parameter num.
+   */
+  Chartist.rho = function(num) {
+    if(num === 1) {
+      return num;
+    }
+
+    function gcd(p, q) {
+      if (p % q === 0) {
+        return q;
+      } else {
+        return gcd(q, p % q);
+      }
+    }
+
+    function f(x) {
+      return x * x + 1;
+    }
+
+    var x1 = 2, x2 = 2, divisor;
+    if (num % 2 === 0) {
+      return 2;
+    }
+
+    do {
+      x1 = f(x1) % num;
+      x2 = f(f(x2)) % num;
+      divisor = gcd(Math.abs(x1 - x2), num);
+    } while (divisor === 1);
+
+    return divisor;
+  };
+
+  /**
+   * Calculate and retrieve all the bounds for the chart and return them in one array
+   *
+   * @memberof Chartist.Core
+   * @param {Number} axisLength The length of the Axis used for
+   * @param {Object} highLow An object containing a high and low property indicating the value range of the chart.
+   * @param {Number} scaleMinSpace The minimum projected length a step should result in
+   * @param {Number} referenceValue The reference value for the chart.
+   * @param {Boolean} onlyInteger
+   * @return {Object} All the values to set the bounds of the chart
+   */
+  Chartist.getBounds = function (axisLength, highLow, scaleMinSpace, referenceValue, onlyInteger) {
+    var i,
+      optimizationCounter = 0,
+      newMin,
+      newMax,
+      bounds = {
+        high: highLow.high,
+        low: highLow.low
+      };
+
+    // Overrides of high / low based on reference value, it will make sure that the invisible reference value is
+    // used to generate the chart. This is useful when the chart always needs to contain the position of the
+    // invisible reference value in the view i.e. for bipolar scales.
+    if (referenceValue || referenceValue === 0) {
+      bounds.high = Math.max(referenceValue, bounds.high);
+      bounds.low = Math.min(referenceValue, bounds.low);
+    }
+
+    bounds.valueRange = bounds.high - bounds.low;
+    bounds.oom = Chartist.orderOfMagnitude(bounds.valueRange);
+    bounds.step = Math.pow(10, bounds.oom);
+    bounds.min = Math.floor(bounds.low / bounds.step) * bounds.step;
+    bounds.max = Math.ceil(bounds.high / bounds.step) * bounds.step;
+    bounds.range = bounds.max - bounds.min;
+    bounds.numberOfSteps = Math.round(bounds.range / bounds.step);
+
+    // Optimize scale step by checking if subdivision is possible based on horizontalGridMinSpace
+    // If we are already below the scaleMinSpace value we will scale up
+    var length = Chartist.projectLength(axisLength, bounds.step, bounds);
+    var scaleUp = length < scaleMinSpace;
+    var smallestFactor = onlyInteger ? Chartist.rho(bounds.range) : 0;
+
+    // First check if we should only use integer steps and if step 1 is still larger than scaleMinSpace so we can use 1
+    if(onlyInteger && Chartist.projectLength(axisLength, 1, bounds) >= scaleMinSpace) {
+      bounds.step = 1;
+    } else if(onlyInteger && smallestFactor < bounds.step && Chartist.projectLength(axisLength, smallestFactor, bounds) >= scaleMinSpace) {
+      // If step 1 was too small, we can try the smallest factor of range
+      // If the smallest factor is smaller than the current bounds.step and the projected length of smallest factor
+      // is larger than the scaleMinSpace we should go for it.
+      bounds.step = smallestFactor;
+    } else {
+      // Trying to divide or multiply by 2 and find the best step value
+      while (true) {
+        if (scaleUp && Chartist.projectLength(axisLength, bounds.step, bounds) <= scaleMinSpace) {
+          bounds.step *= 2;
+        } else if (!scaleUp && Chartist.projectLength(axisLength, bounds.step / 2, bounds) >= scaleMinSpace) {
+          bounds.step /= 2;
+          if(onlyInteger && bounds.step % 1 !== 0) {
+            bounds.step *= 2;
+            break;
+          }
+        } else {
+          break;
+        }
+
+        if(optimizationCounter++ > 1000) {
+          throw new Error('Exceeded maximum number of iterations while optimizing scale step!');
+        }
+      }
+    }
+
+    // Narrow min and max based on new step
+    newMin = bounds.min;
+    newMax = bounds.max;
+    while(newMin + bounds.step <= bounds.low) {
+      newMin += bounds.step;
+    }
+    while(newMax - bounds.step >= bounds.high) {
+      newMax -= bounds.step;
+    }
+    bounds.min = newMin;
+    bounds.max = newMax;
+    bounds.range = bounds.max - bounds.min;
+
+    bounds.values = [];
+    for (i = bounds.min; i <= bounds.max; i += bounds.step) {
+      bounds.values.push(Chartist.roundWithPrecision(i));
+    }
+
+    return bounds;
+  };
+
+  /**
+   * Calculate cartesian coordinates of polar coordinates
+   *
+   * @memberof Chartist.Core
+   * @param {Number} centerX X-axis coordinates of center point of circle segment
+   * @param {Number} centerY X-axis coordinates of center point of circle segment
+   * @param {Number} radius Radius of circle segment
+   * @param {Number} angleInDegrees Angle of circle segment in degrees
+   * @return {Number} Coordinates of point on circumference
+   */
+  Chartist.polarToCartesian = function (centerX, centerY, radius, angleInDegrees) {
+    var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+
+    return {
+      x: centerX + (radius * Math.cos(angleInRadians)),
+      y: centerY + (radius * Math.sin(angleInRadians))
+    };
+  };
+
+  /**
+   * Initialize chart drawing rectangle (area where chart is drawn) x1,y1 = bottom left / x2,y2 = top right
+   *
+   * @memberof Chartist.Core
+   * @param {Object} svg The svg element for the chart
+   * @param {Object} options The Object that contains all the optional values for the chart
+   * @param {Number} [fallbackPadding] The fallback padding if partial padding objects are used
+   * @return {Object} The chart rectangles coordinates inside the svg element plus the rectangles measurements
+   */
+  Chartist.createChartRect = function (svg, options, fallbackPadding) {
+    var hasAxis = !!(options.axisX || options.axisY);
+    var yAxisOffset = hasAxis ? options.axisY.offset : 0;
+    var xAxisOffset = hasAxis ? options.axisX.offset : 0;
+    // If width or height results in invalid value (including 0) we fallback to the unitless settings or even 0
+    var width = svg.width() || Chartist.stripUnit(options.width) || 0;
+    var height = svg.height() || Chartist.stripUnit(options.height) || 0;
+    var normalizedPadding = Chartist.normalizePadding(options.chartPadding, fallbackPadding);
+
+    // If settings were to small to cope with offset (legacy) and padding, we'll adjust
+    width = Math.max(width, yAxisOffset + normalizedPadding.left + normalizedPadding.right);
+    height = Math.max(height, xAxisOffset + normalizedPadding.top + normalizedPadding.bottom);
+
+    var chartRect = {
+      padding: normalizedPadding,
+      width: function () {
+        return this.x2 - this.x1;
+      },
+      height: function () {
+        return this.y1 - this.y2;
+      }
+    };
+
+    if(hasAxis) {
+      if (options.axisX.position === 'start') {
+        chartRect.y2 = normalizedPadding.top + xAxisOffset;
+        chartRect.y1 = Math.max(height - normalizedPadding.bottom, chartRect.y2 + 1);
+      } else {
+        chartRect.y2 = normalizedPadding.top;
+        chartRect.y1 = Math.max(height - normalizedPadding.bottom - xAxisOffset, chartRect.y2 + 1);
+      }
+
+      if (options.axisY.position === 'start') {
+        chartRect.x1 = normalizedPadding.left + yAxisOffset;
+        chartRect.x2 = Math.max(width - normalizedPadding.right, chartRect.x1 + 1);
+      } else {
+        chartRect.x1 = normalizedPadding.left;
+        chartRect.x2 = Math.max(width - normalizedPadding.right - yAxisOffset, chartRect.x1 + 1);
+      }
+    } else {
+      chartRect.x1 = normalizedPadding.left;
+      chartRect.x2 = Math.max(width - normalizedPadding.right, chartRect.x1 + 1);
+      chartRect.y2 = normalizedPadding.top;
+      chartRect.y1 = Math.max(height - normalizedPadding.bottom, chartRect.y2 + 1);
+    }
+
+    return chartRect;
+  };
+
+  /**
+   * Creates a grid line based on a projected value.
+   *
+   * @memberof Chartist.Core
+   * @param position
+   * @param index
+   * @param axis
+   * @param offset
+   * @param length
+   * @param group
+   * @param classes
+   * @param eventEmitter
+   */
+  Chartist.createGrid = function(position, index, axis, offset, length, group, classes, eventEmitter) {
+    var positionalData = {};
+    positionalData[axis.units.pos + '1'] = position;
+    positionalData[axis.units.pos + '2'] = position;
+    positionalData[axis.counterUnits.pos + '1'] = offset;
+    positionalData[axis.counterUnits.pos + '2'] = offset + length;
+
+    var gridElement = group.elem('line', positionalData, classes.join(' '));
+
+    // Event for grid draw
+    eventEmitter.emit('draw',
+      Chartist.extend({
+        type: 'grid',
+        axis: axis,
+        index: index,
+        group: group,
+        element: gridElement
+      }, positionalData)
+    );
+  };
+
+  /**
+   * Creates a label based on a projected value and an axis.
+   *
+   * @memberof Chartist.Core
+   * @param position
+   * @param length
+   * @param index
+   * @param labels
+   * @param axis
+   * @param axisOffset
+   * @param labelOffset
+   * @param group
+   * @param classes
+   * @param useForeignObject
+   * @param eventEmitter
+   */
+  Chartist.createLabel = function(position, length, index, labels, axis, axisOffset, labelOffset, group, classes, useForeignObject, eventEmitter) {
+    var labelElement;
+    var positionalData = {};
+
+    positionalData[axis.units.pos] = position + labelOffset[axis.units.pos];
+    positionalData[axis.counterUnits.pos] = labelOffset[axis.counterUnits.pos];
+    positionalData[axis.units.len] = length;
+    positionalData[axis.counterUnits.len] = axisOffset - 10;
+
+    if(useForeignObject) {
+      // We need to set width and height explicitly to px as span will not expand with width and height being
+      // 100% in all browsers
+      var content = '<span class="' + classes.join(' ') + '" style="' +
+        axis.units.len + ': ' + Math.round(positionalData[axis.units.len]) + 'px; ' +
+        axis.counterUnits.len + ': ' + Math.round(positionalData[axis.counterUnits.len]) + 'px">' +
+        labels[index] + '</span>';
+
+      labelElement = group.foreignObject(content, Chartist.extend({
+        style: 'overflow: visible;'
+      }, positionalData));
+    } else {
+      labelElement = group.elem('text', positionalData, classes.join(' ')).text(labels[index]);
+    }
+
+    eventEmitter.emit('draw', Chartist.extend({
+      type: 'label',
+      axis: axis,
+      index: index,
+      group: group,
+      element: labelElement,
+      text: labels[index]
+    }, positionalData));
+  };
+
+  /**
+   * Helper to read series specific options from options object. It automatically falls back to the global option if
+   * there is no option in the series options.
+   *
+   * @param {Object} series Series object
+   * @param {Object} options Chartist options object
+   * @param {string} key The options key that should be used to obtain the options
+   * @returns {*}
+   */
+  Chartist.getSeriesOption = function(series, options, key) {
+    if(series.name && options.series && options.series[series.name]) {
+      var seriesOptions = options.series[series.name];
+      return seriesOptions.hasOwnProperty(key) ? seriesOptions[key] : options[key];
+    } else {
+      return options[key];
+    }
+  };
+
+  /**
+   * Provides options handling functionality with callback for options changes triggered by responsive options and media query matches
+   *
+   * @memberof Chartist.Core
+   * @param {Object} options Options set by user
+   * @param {Array} responsiveOptions Optional functions to add responsive behavior to chart
+   * @param {Object} eventEmitter The event emitter that will be used to emit the options changed events
+   * @return {Object} The consolidated options object from the defaults, base and matching responsive options
+   */
+  Chartist.optionsProvider = function (options, responsiveOptions, eventEmitter) {
+    var baseOptions = Chartist.extend({}, options),
+      currentOptions,
+      mediaQueryListeners = [],
+      i;
+
+    function updateCurrentOptions(preventChangedEvent) {
+      var previousOptions = currentOptions;
+      currentOptions = Chartist.extend({}, baseOptions);
+
+      if (responsiveOptions) {
+        for (i = 0; i < responsiveOptions.length; i++) {
+          var mql = window.matchMedia(responsiveOptions[i][0]);
+          if (mql.matches) {
+            currentOptions = Chartist.extend(currentOptions, responsiveOptions[i][1]);
+          }
+        }
+      }
+
+      if(eventEmitter && !preventChangedEvent) {
+        eventEmitter.emit('optionsChanged', {
+          previousOptions: previousOptions,
+          currentOptions: currentOptions
+        });
+      }
+    }
+
+    function removeMediaQueryListeners() {
+      mediaQueryListeners.forEach(function(mql) {
+        mql.removeListener(updateCurrentOptions);
+      });
+    }
+
+    if (!window.matchMedia) {
+      throw 'window.matchMedia not found! Make sure you\'re using a polyfill.';
+    } else if (responsiveOptions) {
+
+      for (i = 0; i < responsiveOptions.length; i++) {
+        var mql = window.matchMedia(responsiveOptions[i][0]);
+        mql.addListener(updateCurrentOptions);
+        mediaQueryListeners.push(mql);
+      }
+    }
+    // Execute initially so we get the correct options
+    updateCurrentOptions(true);
+
+    return {
+      removeMediaQueryListeners: removeMediaQueryListeners,
+      getCurrentOptions: function getCurrentOptions() {
+        return Chartist.extend({}, currentOptions);
+      }
+    };
+  };
+
+}(window, document, Chartist));
+;/**
+ * Chartist path interpolation functions.
+ *
+ * @module Chartist.Interpolation
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  Chartist.Interpolation = {};
+
+  /**
+   * This interpolation function does not smooth the path and the result is only containing lines and no curves.
+   *
+   * @memberof Chartist.Interpolation
+   * @return {Function}
+   */
+  Chartist.Interpolation.none = function() {
+    return function none(pathCoordinates, valueData) {
+      var path = new Chartist.Svg.Path();
+      // We need to assume that the first value is a "hole"
+      var hole = true;
+
+      for(var i = 1; i < pathCoordinates.length; i += 2) {
+        var data = valueData[(i - 1) / 2];
+
+        // If the current value is undefined we should treat it as a hole start
+        if(data.value === undefined) {
+          hole = true;
+        } else {
+          // If this value is valid we need to check if we're coming out of a hole
+          if(hole) {
+            // If we are coming out of a hole we should first make a move and also reset the hole flag
+            path.move(pathCoordinates[i - 1], pathCoordinates[i], false, data);
+            hole = false;
+          } else {
+            path.line(pathCoordinates[i - 1], pathCoordinates[i], false, data);
+          }
+        }
+      }
+
+      return path;
+    };
+  };
+
+  /**
+   * Simple smoothing creates horizontal handles that are positioned with a fraction of the length between two data points. You can use the divisor option to specify the amount of smoothing.
+   *
+   * Simple smoothing can be used instead of `Chartist.Smoothing.cardinal` if you'd like to get rid of the artifacts it produces sometimes. Simple smoothing produces less flowing lines but is accurate by hitting the points and it also doesn't swing below or above the given data point.
+   *
+   * All smoothing functions within Chartist are factory functions that accept an options parameter. The simple interpolation function accepts one configuration parameter `divisor`, between 1 and ∞, which controls the smoothing characteristics.
+   *
+   * @example
+   * var chart = new Chartist.Line('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5],
+   *   series: [[1, 2, 8, 1, 7]]
+   * }, {
+   *   lineSmooth: Chartist.Interpolation.simple({
+   *     divisor: 2
+   *   })
+   * });
+   *
+   *
+   * @memberof Chartist.Interpolation
+   * @param {Object} options The options of the simple interpolation factory function.
+   * @return {Function}
+   */
+  Chartist.Interpolation.simple = function(options) {
+    var defaultOptions = {
+      divisor: 2
+    };
+    options = Chartist.extend({}, defaultOptions, options);
+
+    var d = 1 / Math.max(1, options.divisor);
+
+    return function simple(pathCoordinates, valueData) {
+      var path = new Chartist.Svg.Path();
+      var hole = true;
+
+      for(var i = 2; i < pathCoordinates.length; i += 2) {
+        var prevX = pathCoordinates[i - 2];
+        var prevY = pathCoordinates[i - 1];
+        var currX = pathCoordinates[i];
+        var currY = pathCoordinates[i + 1];
+        var length = (currX - prevX) * d;
+        var prevData = valueData[(i / 2) - 1];
+        var currData = valueData[i / 2];
+
+        if(prevData.value === undefined) {
+          hole = true;
+        } else {
+
+          if(hole) {
+            path.move(prevX, prevY, false, prevData);
+          }
+
+          if(currData.value !== undefined) {
+            path.curve(
+              prevX + length,
+              prevY,
+              currX - length,
+              currY,
+              currX,
+              currY,
+              false,
+              currData
+            );
+
+            hole = false;
+          }
+        }
+      }
+
+      return path;
+    };
+  };
+
+  /**
+   * Cardinal / Catmull-Rome spline interpolation is the default smoothing function in Chartist. It produces nice results where the splines will always meet the points. It produces some artifacts though when data values are increased or decreased rapidly. The line may not follow a very accurate path and if the line should be accurate this smoothing function does not produce the best results.
+   *
+   * Cardinal splines can only be created if there are more than two data points. If this is not the case this smoothing will fallback to `Chartist.Smoothing.none`.
+   *
+   * All smoothing functions within Chartist are factory functions that accept an options parameter. The cardinal interpolation function accepts one configuration parameter `tension`, between 0 and 1, which controls the smoothing intensity.
+   *
+   * @example
+   * var chart = new Chartist.Line('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5],
+   *   series: [[1, 2, 8, 1, 7]]
+   * }, {
+   *   lineSmooth: Chartist.Interpolation.cardinal({
+   *     tension: 1
+   *   })
+   * });
+   *
+   * @memberof Chartist.Interpolation
+   * @param {Object} options The options of the cardinal factory function.
+   * @return {Function}
+   */
+  Chartist.Interpolation.cardinal = function(options) {
+    var defaultOptions = {
+      tension: 1
+    };
+
+    options = Chartist.extend({}, defaultOptions, options);
+
+    var t = Math.min(1, Math.max(0, options.tension)),
+      c = 1 - t;
+
+    // This function will help us to split pathCoordinates and valueData into segments that also contain pathCoordinates
+    // and valueData. This way the existing functions can be reused and the segment paths can be joined afterwards.
+    // This functionality is necessary to treat "holes" in the line charts
+    function splitIntoSegments(pathCoordinates, valueData) {
+      var segments = [];
+      var hole = true;
+
+      for(var i = 0; i < pathCoordinates.length; i += 2) {
+        // If this value is a "hole" we set the hole flag
+        if(valueData[i / 2].value === undefined) {
+          hole = true;
+        } else {
+          // If it's a valid value we need to check if we're coming out of a hole and create a new empty segment
+          if(hole) {
+            segments.push({
+              pathCoordinates: [],
+              valueData: []
+            });
+            // As we have a valid value now, we are not in a "hole" anymore
+            hole = false;
+          }
+
+          // Add to the segment pathCoordinates and valueData
+          segments[segments.length - 1].pathCoordinates.push(pathCoordinates[i], pathCoordinates[i + 1]);
+          segments[segments.length - 1].valueData.push(valueData[i / 2]);
+        }
+      }
+
+      return segments;
+    }
+
+    return function cardinal(pathCoordinates, valueData) {
+      // First we try to split the coordinates into segments
+      // This is necessary to treat "holes" in line charts
+      var segments = splitIntoSegments(pathCoordinates, valueData);
+
+      // If the split resulted in more that one segment we need to interpolate each segment individually and join them
+      // afterwards together into a single path.
+      if(segments.length > 1) {
+        var paths = [];
+        // For each segment we will recurse the cardinal function
+        segments.forEach(function(segment) {
+          paths.push(cardinal(segment.pathCoordinates, segment.valueData));
+        });
+        // Join the segment path data into a single path and return
+        return Chartist.Svg.Path.join(paths);
+      } else {
+        // If there was only one segment we can proceed regularly by using pathCoordinates and valueData from the first
+        // segment
+        pathCoordinates = segments[0].pathCoordinates;
+        valueData = segments[0].valueData;
+
+        // If less than two points we need to fallback to no smoothing
+        if(pathCoordinates.length <= 4) {
+          return Chartist.Interpolation.none()(pathCoordinates, valueData);
+        }
+
+        var path = new Chartist.Svg.Path().move(pathCoordinates[0], pathCoordinates[1], false, valueData[0]),
+          z;
+
+        for (var i = 0, iLen = pathCoordinates.length; iLen - 2 * !z > i; i += 2) {
+          var p = [
+            {x: +pathCoordinates[i - 2], y: +pathCoordinates[i - 1]},
+            {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]},
+            {x: +pathCoordinates[i + 2], y: +pathCoordinates[i + 3]},
+            {x: +pathCoordinates[i + 4], y: +pathCoordinates[i + 5]}
+          ];
+          if (z) {
+            if (!i) {
+              p[0] = {x: +pathCoordinates[iLen - 2], y: +pathCoordinates[iLen - 1]};
+            } else if (iLen - 4 === i) {
+              p[3] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
+            } else if (iLen - 2 === i) {
+              p[2] = {x: +pathCoordinates[0], y: +pathCoordinates[1]};
+              p[3] = {x: +pathCoordinates[2], y: +pathCoordinates[3]};
+            }
+          } else {
+            if (iLen - 4 === i) {
+              p[3] = p[2];
+            } else if (!i) {
+              p[0] = {x: +pathCoordinates[i], y: +pathCoordinates[i + 1]};
+            }
+          }
+
+          path.curve(
+            (t * (-p[0].x + 6 * p[1].x + p[2].x) / 6) + (c * p[2].x),
+            (t * (-p[0].y + 6 * p[1].y + p[2].y) / 6) + (c * p[2].y),
+            (t * (p[1].x + 6 * p[2].x - p[3].x) / 6) + (c * p[2].x),
+            (t * (p[1].y + 6 * p[2].y - p[3].y) / 6) + (c * p[2].y),
+            p[2].x,
+            p[2].y,
+            false,
+            valueData[(i + 2) / 2]
+          );
+        }
+
+        return path;
+      }
+    };
+  };
+
+  /**
+   * Step interpolation will cause the line chart to move in steps rather than diagonal or smoothed lines. This interpolation will create additional points that will also be drawn when the `showPoint` option is enabled.
+   *
+   * All smoothing functions within Chartist are factory functions that accept an options parameter. The step interpolation function accepts one configuration parameter `postpone`, that can be `true` or `false`. The default value is `true` and will cause the step to occur where the value actually changes. If a different behaviour is needed where the step is shifted to the left and happens before the actual value, this option can be set to `false`.
+   *
+   * @example
+   * var chart = new Chartist.Line('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5],
+   *   series: [[1, 2, 8, 1, 7]]
+   * }, {
+   *   lineSmooth: Chartist.Interpolation.step({
+   *     postpone: true
+   *   })
+   * });
+   *
+   * @memberof Chartist.Interpolation
+   * @param options
+   * @returns {Function}
+   */
+  Chartist.Interpolation.step = function(options) {
+    var defaultOptions = {
+      postpone: true
+    };
+
+    options = Chartist.extend({}, defaultOptions, options);
+
+    return function step(pathCoordinates, valueData) {
+      var path = new Chartist.Svg.Path();
+      var hole = true;
+
+      for (var i = 2; i < pathCoordinates.length; i += 2) {
+        var prevX = pathCoordinates[i - 2];
+        var prevY = pathCoordinates[i - 1];
+        var currX = pathCoordinates[i];
+        var currY = pathCoordinates[i + 1];
+        var prevData = valueData[(i / 2) - 1];
+        var currData = valueData[i / 2];
+
+        // If last point is a "hole"
+        if(prevData.value === undefined) {
+          hole = true;
+        } else {
+          // If last point is not a "hole" but we just came back out of a "hole" we need to move first
+          if(hole) {
+            path.move(prevX, prevY, false, prevData);
+          }
+
+          // If the current point is also not a hole we can draw the step lines
+          if(currData.value !== undefined) {
+            if(options.postpone) {
+              // If postponed we should draw the step line with the value of the previous value
+              path.line(currX, prevY, false, prevData);
+            } else {
+              // If not postponed we should draw the step line with the value of the current value
+              path.line(prevX, currY, false, currData);
+            }
+            // Line to the actual point (this should only be a Y-Axis movement
+            path.line(currX, currY, false, currData);
+            // Reset the "hole" flag as previous and current point have valid values
+            hole = false;
+          }
+        }
+      }
+
+      return path;
+    };
+  };
+
+}(window, document, Chartist));
+;/**
+ * A very basic event module that helps to generate and catch events.
+ *
+ * @module Chartist.Event
+ */
+/* global Chartist */
+(function (window, document, Chartist) {
+  'use strict';
+
+  Chartist.EventEmitter = function () {
+    var handlers = [];
+
+    /**
+     * Add an event handler for a specific event
+     *
+     * @memberof Chartist.Event
+     * @param {String} event The event name
+     * @param {Function} handler A event handler function
+     */
+    function addEventHandler(event, handler) {
+      handlers[event] = handlers[event] || [];
+      handlers[event].push(handler);
+    }
+
+    /**
+     * Remove an event handler of a specific event name or remove all event handlers for a specific event.
+     *
+     * @memberof Chartist.Event
+     * @param {String} event The event name where a specific or all handlers should be removed
+     * @param {Function} [handler] An optional event handler function. If specified only this specific handler will be removed and otherwise all handlers are removed.
+     */
+    function removeEventHandler(event, handler) {
+      // Only do something if there are event handlers with this name existing
+      if(handlers[event]) {
+        // If handler is set we will look for a specific handler and only remove this
+        if(handler) {
+          handlers[event].splice(handlers[event].indexOf(handler), 1);
+          if(handlers[event].length === 0) {
+            delete handlers[event];
+          }
+        } else {
+          // If no handler is specified we remove all handlers for this event
+          delete handlers[event];
+        }
+      }
+    }
+
+    /**
+     * Use this function to emit an event. All handlers that are listening for this event will be triggered with the data parameter.
+     *
+     * @memberof Chartist.Event
+     * @param {String} event The event name that should be triggered
+     * @param {*} data Arbitrary data that will be passed to the event handler callback functions
+     */
+    function emit(event, data) {
+      // Only do something if there are event handlers with this name existing
+      if(handlers[event]) {
+        handlers[event].forEach(function(handler) {
+          handler(data);
+        });
+      }
+
+      // Emit event to star event handlers
+      if(handlers['*']) {
+        handlers['*'].forEach(function(starHandler) {
+          starHandler(event, data);
+        });
+      }
+    }
+
+    return {
+      addEventHandler: addEventHandler,
+      removeEventHandler: removeEventHandler,
+      emit: emit
+    };
+  };
+
+}(window, document, Chartist));
+;/**
+ * This module provides some basic prototype inheritance utilities.
+ *
+ * @module Chartist.Class
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  function listToArray(list) {
+    var arr = [];
+    if (list.length) {
+      for (var i = 0; i < list.length; i++) {
+        arr.push(list[i]);
+      }
+    }
+    return arr;
+  }
+
+  /**
+   * Method to extend from current prototype.
+   *
+   * @memberof Chartist.Class
+   * @param {Object} properties The object that serves as definition for the prototype that gets created for the new class. This object should always contain a constructor property that is the desired constructor for the newly created class.
+   * @param {Object} [superProtoOverride] By default extens will use the current class prototype or Chartist.class. With this parameter you can specify any super prototype that will be used.
+   * @return {Function} Constructor function of the new class
+   *
+   * @example
+   * var Fruit = Class.extend({
+     * color: undefined,
+     *   sugar: undefined,
+     *
+     *   constructor: function(color, sugar) {
+     *     this.color = color;
+     *     this.sugar = sugar;
+     *   },
+     *
+     *   eat: function() {
+     *     this.sugar = 0;
+     *     return this;
+     *   }
+     * });
+   *
+   * var Banana = Fruit.extend({
+     *   length: undefined,
+     *
+     *   constructor: function(length, sugar) {
+     *     Banana.super.constructor.call(this, 'Yellow', sugar);
+     *     this.length = length;
+     *   }
+     * });
+   *
+   * var banana = new Banana(20, 40);
+   * console.log('banana instanceof Fruit', banana instanceof Fruit);
+   * console.log('Fruit is prototype of banana', Fruit.prototype.isPrototypeOf(banana));
+   * console.log('bananas prototype is Fruit', Object.getPrototypeOf(banana) === Fruit.prototype);
+   * console.log(banana.sugar);
+   * console.log(banana.eat().sugar);
+   * console.log(banana.color);
+   */
+  function extend(properties, superProtoOverride) {
+    var superProto = superProtoOverride || this.prototype || Chartist.Class;
+    var proto = Object.create(superProto);
+
+    Chartist.Class.cloneDefinitions(proto, properties);
+
+    var constr = function() {
+      var fn = proto.constructor || function () {},
+        instance;
+
+      // If this is linked to the Chartist namespace the constructor was not called with new
+      // To provide a fallback we will instantiate here and return the instance
+      instance = this === Chartist ? Object.create(proto) : this;
+      fn.apply(instance, Array.prototype.slice.call(arguments, 0));
+
+      // If this constructor was not called with new we need to return the instance
+      // This will not harm when the constructor has been called with new as the returned value is ignored
+      return instance;
+    };
+
+    constr.prototype = proto;
+    constr.super = superProto;
+    constr.extend = this.extend;
+
+    return constr;
+  }
+
+  // Variable argument list clones args > 0 into args[0] and retruns modified args[0]
+  function cloneDefinitions() {
+    var args = listToArray(arguments);
+    var target = args[0];
+
+    args.splice(1, args.length - 1).forEach(function (source) {
+      Object.getOwnPropertyNames(source).forEach(function (propName) {
+        // If this property already exist in target we delete it first
+        delete target[propName];
+        // Define the property with the descriptor from source
+        Object.defineProperty(target, propName,
+          Object.getOwnPropertyDescriptor(source, propName));
+      });
+    });
+
+    return target;
+  }
+
+  Chartist.Class = {
+    extend: extend,
+    cloneDefinitions: cloneDefinitions
+  };
+
+}(window, document, Chartist));
+;/**
+ * Base for all chart types. The methods in Chartist.Base are inherited to all chart types.
+ *
+ * @module Chartist.Base
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  // TODO: Currently we need to re-draw the chart on window resize. This is usually very bad and will affect performance.
+  // This is done because we can't work with relative coordinates when drawing the chart because SVG Path does not
+  // work with relative positions yet. We need to check if we can do a viewBox hack to switch to percentage.
+  // See http://mozilla.6506.n7.nabble.com/Specyfing-paths-with-percentages-unit-td247474.html
+  // Update: can be done using the above method tested here: http://codepen.io/gionkunz/pen/KDvLj
+  // The problem is with the label offsets that can't be converted into percentage and affecting the chart container
+  /**
+   * Updates the chart which currently does a full reconstruction of the SVG DOM
+   *
+   * @param {Object} [data] Optional data you'd like to set for the chart before it will update. If not specified the update method will use the data that is already configured with the chart.
+   * @param {Object} [options] Optional options you'd like to add to the previous options for the chart before it will update. If not specified the update method will use the options that have been already configured with the chart.
+   * @param {Boolean} [override] If set to true, the passed options will be used to extend the options that have been configured already. Otherwise the chart default options will be used as the base
+   * @memberof Chartist.Base
+   */
+  function update(data, options, override) {
+    if(data) {
+      this.data = data;
+      // Event for data transformation that allows to manipulate the data before it gets rendered in the charts
+      this.eventEmitter.emit('data', {
+        type: 'update',
+        data: this.data
+      });
+    }
+
+    if(options) {
+      this.options = Chartist.extend({}, override ? this.options : this.defaultOptions, options);
+
+      // If chartist was not initialized yet, we just set the options and leave the rest to the initialization
+      // Otherwise we re-create the optionsProvider at this point
+      if(!this.initializeTimeoutId) {
+        this.optionsProvider.removeMediaQueryListeners();
+        this.optionsProvider = Chartist.optionsProvider(this.options, this.responsiveOptions, this.eventEmitter);
+      }
+    }
+
+    // Only re-created the chart if it has been initialized yet
+    if(!this.initializeTimeoutId) {
+      this.createChart(this.optionsProvider.getCurrentOptions());
+    }
+
+    // Return a reference to the chart object to chain up calls
+    return this;
+  }
+
+  /**
+   * This method can be called on the API object of each chart and will un-register all event listeners that were added to other components. This currently includes a window.resize listener as well as media query listeners if any responsive options have been provided. Use this function if you need to destroy and recreate Chartist charts dynamically.
+   *
+   * @memberof Chartist.Base
+   */
+  function detach() {
+    // Only detach if initialization already occurred on this chart. If this chart still hasn't initialized (therefore
+    // the initializationTimeoutId is still a valid timeout reference, we will clear the timeout
+    if(!this.initializeTimeoutId) {
+      window.removeEventListener('resize', this.resizeListener);
+      this.optionsProvider.removeMediaQueryListeners();
+    } else {
+      window.clearTimeout(this.initializeTimeoutId);
+    }
+
+    return this;
+  }
+
+  /**
+   * Use this function to register event handlers. The handler callbacks are synchronous and will run in the main thread rather than the event loop.
+   *
+   * @memberof Chartist.Base
+   * @param {String} event Name of the event. Check the examples for supported events.
+   * @param {Function} handler The handler function that will be called when an event with the given name was emitted. This function will receive a data argument which contains event data. See the example for more details.
+   */
+  function on(event, handler) {
+    this.eventEmitter.addEventHandler(event, handler);
+    return this;
+  }
+
+  /**
+   * Use this function to un-register event handlers. If the handler function parameter is omitted all handlers for the given event will be un-registered.
+   *
+   * @memberof Chartist.Base
+   * @param {String} event Name of the event for which a handler should be removed
+   * @param {Function} [handler] The handler function that that was previously used to register a new event handler. This handler will be removed from the event handler list. If this parameter is omitted then all event handlers for the given event are removed from the list.
+   */
+  function off(event, handler) {
+    this.eventEmitter.removeEventHandler(event, handler);
+    return this;
+  }
+
+  function initialize() {
+    // Add window resize listener that re-creates the chart
+    window.addEventListener('resize', this.resizeListener);
+
+    // Obtain current options based on matching media queries (if responsive options are given)
+    // This will also register a listener that is re-creating the chart based on media changes
+    this.optionsProvider = Chartist.optionsProvider(this.options, this.responsiveOptions, this.eventEmitter);
+    // Register options change listener that will trigger a chart update
+    this.eventEmitter.addEventHandler('optionsChanged', function() {
+      this.update();
+    }.bind(this));
+
+    // Before the first chart creation we need to register us with all plugins that are configured
+    // Initialize all relevant plugins with our chart object and the plugin options specified in the config
+    if(this.options.plugins) {
+      this.options.plugins.forEach(function(plugin) {
+        if(plugin instanceof Array) {
+          plugin[0](this, plugin[1]);
+        } else {
+          plugin(this);
+        }
+      }.bind(this));
+    }
+
+    // Event for data transformation that allows to manipulate the data before it gets rendered in the charts
+    this.eventEmitter.emit('data', {
+      type: 'initial',
+      data: this.data
+    });
+
+    // Create the first chart
+    this.createChart(this.optionsProvider.getCurrentOptions());
+
+    // As chart is initialized from the event loop now we can reset our timeout reference
+    // This is important if the chart gets initialized on the same element twice
+    this.initializeTimeoutId = undefined;
+  }
+
+  /**
+   * Constructor of chart base class.
+   *
+   * @param query
+   * @param data
+   * @param defaultOptions
+   * @param options
+   * @param responsiveOptions
+   * @constructor
+   */
+  function Base(query, data, defaultOptions, options, responsiveOptions) {
+    this.container = Chartist.querySelector(query);
+    this.data = data;
+    this.defaultOptions = defaultOptions;
+    this.options = options;
+    this.responsiveOptions = responsiveOptions;
+    this.eventEmitter = Chartist.EventEmitter();
+    this.supportsForeignObject = Chartist.Svg.isSupported('Extensibility');
+    this.supportsAnimations = Chartist.Svg.isSupported('AnimationEventsAttribute');
+    this.resizeListener = function resizeListener(){
+      this.update();
+    }.bind(this);
+
+    if(this.container) {
+      // If chartist was already initialized in this container we are detaching all event listeners first
+      if(this.container.__chartist__) {
+        this.container.__chartist__.detach();
+      }
+
+      this.container.__chartist__ = this;
+    }
+
+    // Using event loop for first draw to make it possible to register event listeners in the same call stack where
+    // the chart was created.
+    this.initializeTimeoutId = setTimeout(initialize.bind(this), 0);
+  }
+
+  // Creating the chart base class
+  Chartist.Base = Chartist.Class.extend({
+    constructor: Base,
+    optionsProvider: undefined,
+    container: undefined,
+    svg: undefined,
+    eventEmitter: undefined,
+    createChart: function() {
+      throw new Error('Base chart type can\'t be instantiated!');
+    },
+    update: update,
+    detach: detach,
+    on: on,
+    off: off,
+    version: Chartist.version,
+    supportsForeignObject: false
+  });
+
+}(window, document, Chartist));
+;/**
+ * Chartist SVG module for simple SVG DOM abstraction
+ *
+ * @module Chartist.Svg
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  var svgNs = 'http://www.w3.org/2000/svg',
+    xmlNs = 'http://www.w3.org/2000/xmlns/',
+    xhtmlNs = 'http://www.w3.org/1999/xhtml';
+
+  Chartist.xmlNs = {
+    qualifiedName: 'xmlns:ct',
+    prefix: 'ct',
+    uri: 'http://gionkunz.github.com/chartist-js/ct'
+  };
+
+  /**
+   * Chartist.Svg creates a new SVG object wrapper with a starting element. You can use the wrapper to fluently create sub-elements and modify them.
+   *
+   * @memberof Chartist.Svg
+   * @constructor
+   * @param {String|Element} name The name of the SVG element to create or an SVG dom element which should be wrapped into Chartist.Svg
+   * @param {Object} attributes An object with properties that will be added as attributes to the SVG element that is created. Attributes with undefined values will not be added.
+   * @param {String} className This class or class list will be added to the SVG element
+   * @param {Object} parent The parent SVG wrapper object where this newly created wrapper and it's element will be attached to as child
+   * @param {Boolean} insertFirst If this param is set to true in conjunction with a parent element the newly created element will be added as first child element in the parent element
+   */
+  function Svg(name, attributes, className, parent, insertFirst) {
+    // If Svg is getting called with an SVG element we just return the wrapper
+    if(name instanceof Element) {
+      this._node = name;
+    } else {
+      this._node = document.createElementNS(svgNs, name);
+
+      // If this is an SVG element created then custom namespace
+      if(name === 'svg') {
+        this._node.setAttributeNS(xmlNs, Chartist.xmlNs.qualifiedName, Chartist.xmlNs.uri);
+      }
+
+      if(attributes) {
+        this.attr(attributes);
+      }
+
+      if(className) {
+        this.addClass(className);
+      }
+
+      if(parent) {
+        if (insertFirst && parent._node.firstChild) {
+          parent._node.insertBefore(this._node, parent._node.firstChild);
+        } else {
+          parent._node.appendChild(this._node);
+        }
+      }
+    }
+  }
+
+  /**
+   * Set attributes on the current SVG element of the wrapper you're currently working on.
+   *
+   * @memberof Chartist.Svg
+   * @param {Object|String} attributes An object with properties that will be added as attributes to the SVG element that is created. Attributes with undefined values will not be added. If this parameter is a String then the function is used as a getter and will return the attribute value.
+   * @param {String} ns If specified, the attributes will be set as namespace attributes with ns as prefix.
+   * @return {Object|String} The current wrapper object will be returned so it can be used for chaining or the attribute value if used as getter function.
+   */
+  function attr(attributes, ns) {
+    if(typeof attributes === 'string') {
+      if(ns) {
+        return this._node.getAttributeNS(ns, attributes);
+      } else {
+        return this._node.getAttribute(attributes);
+      }
+    }
+
+    Object.keys(attributes).forEach(function(key) {
+      // If the attribute value is undefined we can skip this one
+      if(attributes[key] === undefined) {
+        return;
+      }
+
+      if(ns) {
+        this._node.setAttributeNS(ns, [Chartist.xmlNs.prefix, ':', key].join(''), attributes[key]);
+      } else {
+        this._node.setAttribute(key, attributes[key]);
+      }
+    }.bind(this));
+
+    return this;
+  }
+
+  /**
+   * Create a new SVG element whose wrapper object will be selected for further operations. This way you can also create nested groups easily.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} name The name of the SVG element that should be created as child element of the currently selected element wrapper
+   * @param {Object} [attributes] An object with properties that will be added as attributes to the SVG element that is created. Attributes with undefined values will not be added.
+   * @param {String} [className] This class or class list will be added to the SVG element
+   * @param {Boolean} [insertFirst] If this param is set to true in conjunction with a parent element the newly created element will be added as first child element in the parent element
+   * @return {Chartist.Svg} Returns a Chartist.Svg wrapper object that can be used to modify the containing SVG data
+   */
+  function elem(name, attributes, className, insertFirst) {
+    return new Chartist.Svg(name, attributes, className, this, insertFirst);
+  }
+
+  /**
+   * Returns the parent Chartist.SVG wrapper object
+   *
+   * @memberof Chartist.Svg
+   * @return {Chartist.Svg} Returns a Chartist.Svg wrapper around the parent node of the current node. If the parent node is not existing or it's not an SVG node then this function will return null.
+   */
+  function parent() {
+    return this._node.parentNode instanceof SVGElement ? new Chartist.Svg(this._node.parentNode) : null;
+  }
+
+  /**
+   * This method returns a Chartist.Svg wrapper around the root SVG element of the current tree.
+   *
+   * @memberof Chartist.Svg
+   * @return {Chartist.Svg} The root SVG element wrapped in a Chartist.Svg element
+   */
+  function root() {
+    var node = this._node;
+    while(node.nodeName !== 'svg') {
+      node = node.parentNode;
+    }
+    return new Chartist.Svg(node);
+  }
+
+  /**
+   * Find the first child SVG element of the current element that matches a CSS selector. The returned object is a Chartist.Svg wrapper.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} selector A CSS selector that is used to query for child SVG elements
+   * @return {Chartist.Svg} The SVG wrapper for the element found or null if no element was found
+   */
+  function querySelector(selector) {
+    var foundNode = this._node.querySelector(selector);
+    return foundNode ? new Chartist.Svg(foundNode) : null;
+  }
+
+  /**
+   * Find the all child SVG elements of the current element that match a CSS selector. The returned object is a Chartist.Svg.List wrapper.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} selector A CSS selector that is used to query for child SVG elements
+   * @return {Chartist.Svg.List} The SVG wrapper list for the element found or null if no element was found
+   */
+  function querySelectorAll(selector) {
+    var foundNodes = this._node.querySelectorAll(selector);
+    return foundNodes.length ? new Chartist.Svg.List(foundNodes) : null;
+  }
+
+  /**
+   * This method creates a foreignObject (see https://developer.mozilla.org/en-US/docs/Web/SVG/Element/foreignObject) that allows to embed HTML content into a SVG graphic. With the help of foreignObjects you can enable the usage of regular HTML elements inside of SVG where they are subject for SVG positioning and transformation but the Browser will use the HTML rendering capabilities for the containing DOM.
+   *
+   * @memberof Chartist.Svg
+   * @param {Node|String} content The DOM Node, or HTML string that will be converted to a DOM Node, that is then placed into and wrapped by the foreignObject
+   * @param {String} [attributes] An object with properties that will be added as attributes to the foreignObject element that is created. Attributes with undefined values will not be added.
+   * @param {String} [className] This class or class list will be added to the SVG element
+   * @param {Boolean} [insertFirst] Specifies if the foreignObject should be inserted as first child
+   * @return {Chartist.Svg} New wrapper object that wraps the foreignObject element
+   */
+  function foreignObject(content, attributes, className, insertFirst) {
+    // If content is string then we convert it to DOM
+    // TODO: Handle case where content is not a string nor a DOM Node
+    if(typeof content === 'string') {
+      var container = document.createElement('div');
+      container.innerHTML = content;
+      content = container.firstChild;
+    }
+
+    // Adding namespace to content element
+    content.setAttribute('xmlns', xhtmlNs);
+
+    // Creating the foreignObject without required extension attribute (as described here
+    // http://www.w3.org/TR/SVG/extend.html#ForeignObjectElement)
+    var fnObj = this.elem('foreignObject', attributes, className, insertFirst);
+
+    // Add content to foreignObjectElement
+    fnObj._node.appendChild(content);
+
+    return fnObj;
+  }
+
+  /**
+   * This method adds a new text element to the current Chartist.Svg wrapper.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} t The text that should be added to the text element that is created
+   * @return {Chartist.Svg} The same wrapper object that was used to add the newly created element
+   */
+  function text(t) {
+    this._node.appendChild(document.createTextNode(t));
+    return this;
+  }
+
+  /**
+   * This method will clear all child nodes of the current wrapper object.
+   *
+   * @memberof Chartist.Svg
+   * @return {Chartist.Svg} The same wrapper object that got emptied
+   */
+  function empty() {
+    while (this._node.firstChild) {
+      this._node.removeChild(this._node.firstChild);
+    }
+
+    return this;
+  }
+
+  /**
+   * This method will cause the current wrapper to remove itself from its parent wrapper. Use this method if you'd like to get rid of an element in a given DOM structure.
+   *
+   * @memberof Chartist.Svg
+   * @return {Chartist.Svg} The parent wrapper object of the element that got removed
+   */
+  function remove() {
+    this._node.parentNode.removeChild(this._node);
+    return this.parent();
+  }
+
+  /**
+   * This method will replace the element with a new element that can be created outside of the current DOM.
+   *
+   * @memberof Chartist.Svg
+   * @param {Chartist.Svg} newElement The new Chartist.Svg object that will be used to replace the current wrapper object
+   * @return {Chartist.Svg} The wrapper of the new element
+   */
+  function replace(newElement) {
+    this._node.parentNode.replaceChild(newElement._node, this._node);
+    return newElement;
+  }
+
+  /**
+   * This method will append an element to the current element as a child.
+   *
+   * @memberof Chartist.Svg
+   * @param {Chartist.Svg} element The Chartist.Svg element that should be added as a child
+   * @param {Boolean} [insertFirst] Specifies if the element should be inserted as first child
+   * @return {Chartist.Svg} The wrapper of the appended object
+   */
+  function append(element, insertFirst) {
+    if(insertFirst && this._node.firstChild) {
+      this._node.insertBefore(element._node, this._node.firstChild);
+    } else {
+      this._node.appendChild(element._node);
+    }
+
+    return this;
+  }
+
+  /**
+   * Returns an array of class names that are attached to the current wrapper element. This method can not be chained further.
+   *
+   * @memberof Chartist.Svg
+   * @return {Array} A list of classes or an empty array if there are no classes on the current element
+   */
+  function classes() {
+    return this._node.getAttribute('class') ? this._node.getAttribute('class').trim().split(/\s+/) : [];
+  }
+
+  /**
+   * Adds one or a space separated list of classes to the current element and ensures the classes are only existing once.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} names A white space separated list of class names
+   * @return {Chartist.Svg} The wrapper of the current element
+   */
+  function addClass(names) {
+    this._node.setAttribute('class',
+      this.classes(this._node)
+        .concat(names.trim().split(/\s+/))
+        .filter(function(elem, pos, self) {
+          return self.indexOf(elem) === pos;
+        }).join(' ')
+    );
+
+    return this;
+  }
+
+  /**
+   * Removes one or a space separated list of classes from the current element.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} names A white space separated list of class names
+   * @return {Chartist.Svg} The wrapper of the current element
+   */
+  function removeClass(names) {
+    var removedClasses = names.trim().split(/\s+/);
+
+    this._node.setAttribute('class', this.classes(this._node).filter(function(name) {
+      return removedClasses.indexOf(name) === -1;
+    }).join(' '));
+
+    return this;
+  }
+
+  /**
+   * Removes all classes from the current element.
+   *
+   * @memberof Chartist.Svg
+   * @return {Chartist.Svg} The wrapper of the current element
+   */
+  function removeAllClasses() {
+    this._node.setAttribute('class', '');
+
+    return this;
+  }
+
+  /**
+   * "Save" way to get property value from svg BoundingBox.
+   * This is a workaround. Firefox throws an NS_ERROR_FAILURE error if getBBox() is called on an invisible node.
+   * See [NS_ERROR_FAILURE: Component returned failure code: 0x80004005](http://jsfiddle.net/sym3tri/kWWDK/)
+   *
+   * @memberof Chartist.Svg
+   * @param {SVGElement} node The svg node to
+   * @param {String} prop The property to fetch (ex.: height, width, ...)
+   * @returns {Number} The value of the given bbox property
+   */
+  function getBBoxProperty(node, prop) {
+    try {
+      return node.getBBox()[prop];
+    } catch(e) {}
+
+    return 0;
+  }
+
+  /**
+   * Get element height with fallback to svg BoundingBox or parent container dimensions:
+   * See [bugzilla.mozilla.org](https://bugzilla.mozilla.org/show_bug.cgi?id=530985)
+   *
+   * @memberof Chartist.Svg
+   * @return {Number} The elements height in pixels
+   */
+  function height() {
+    return this._node.clientHeight || Math.round(getBBoxProperty(this._node, 'height')) || this._node.parentNode.clientHeight;
+  }
+
+  /**
+   * Get element width with fallback to svg BoundingBox or parent container dimensions:
+   * See [bugzilla.mozilla.org](https://bugzilla.mozilla.org/show_bug.cgi?id=530985)
+   *
+   * @memberof Chartist.Core
+   * @return {Number} The elements width in pixels
+   */
+  function width() {
+    return this._node.clientWidth || Math.round(getBBoxProperty(this._node, 'width')) || this._node.parentNode.clientWidth;
+  }
+
+  /**
+   * The animate function lets you animate the current element with SMIL animations. You can add animations for multiple attributes at the same time by using an animation definition object. This object should contain SMIL animation attributes. Please refer to http://www.w3.org/TR/SVG/animate.html for a detailed specification about the available animation attributes. Additionally an easing property can be passed in the animation definition object. This can be a string with a name of an easing function in `Chartist.Svg.Easing` or an array with four numbers specifying a cubic Bézier curve.
+   * **An animations object could look like this:**
+   * ```javascript
+   * element.animate({
+   *   opacity: {
+   *     dur: 1000,
+   *     from: 0,
+   *     to: 1
+   *   },
+   *   x1: {
+   *     dur: '1000ms',
+   *     from: 100,
+   *     to: 200,
+   *     easing: 'easeOutQuart'
+   *   },
+   *   y1: {
+   *     dur: '2s',
+   *     from: 0,
+   *     to: 100
+   *   }
+   * });
+   * ```
+   * **Automatic unit conversion**
+   * For the `dur` and the `begin` animate attribute you can also omit a unit by passing a number. The number will automatically be converted to milli seconds.
+   * **Guided mode**
+   * The default behavior of SMIL animations with offset using the `begin` attribute is that the attribute will keep it's original value until the animation starts. Mostly this behavior is not desired as you'd like to have your element attributes already initialized with the animation `from` value even before the animation starts. Also if you don't specify `fill="freeze"` on an animate element or if you delete the animation after it's done (which is done in guided mode) the attribute will switch back to the initial value. This behavior is also not desired when performing simple one-time animations. For one-time animations you'd want to trigger animations immediately instead of relative to the document begin time. That's why in guided mode Chartist.Svg will also use the `begin` property to schedule a timeout and manually start the animation after the timeout. If you're using multiple SMIL definition objects for an attribute (in an array), guided mode will be disabled for this attribute, even if you explicitly enabled it.
+   * If guided mode is enabled the following behavior is added:
+   * - Before the animation starts (even when delayed with `begin`) the animated attribute will be set already to the `from` value of the animation
+   * - `begin` is explicitly set to `indefinite` so it can be started manually without relying on document begin time (creation)
+   * - The animate element will be forced to use `fill="freeze"`
+   * - The animation will be triggered with `beginElement()` in a timeout where `begin` of the definition object is interpreted in milli seconds. If no `begin` was specified the timeout is triggered immediately.
+   * - After the animation the element attribute value will be set to the `to` value of the animation
+   * - The animate element is deleted from the DOM
+   *
+   * @memberof Chartist.Svg
+   * @param {Object} animations An animations object where the property keys are the attributes you'd like to animate. The properties should be objects again that contain the SMIL animation attributes (usually begin, dur, from, and to). The property begin and dur is auto converted (see Automatic unit conversion). You can also schedule multiple animations for the same attribute by passing an Array of SMIL definition objects. Attributes that contain an array of SMIL definition objects will not be executed in guided mode.
+   * @param {Boolean} guided Specify if guided mode should be activated for this animation (see Guided mode). If not otherwise specified, guided mode will be activated.
+   * @param {Object} eventEmitter If specified, this event emitter will be notified when an animation starts or ends.
+   * @return {Chartist.Svg} The current element where the animation was added
+   */
+  function animate(animations, guided, eventEmitter) {
+    if(guided === undefined) {
+      guided = true;
+    }
+
+    Object.keys(animations).forEach(function createAnimateForAttributes(attribute) {
+
+      function createAnimate(animationDefinition, guided) {
+        var attributeProperties = {},
+          animate,
+          timeout,
+          easing;
+
+        // Check if an easing is specified in the definition object and delete it from the object as it will not
+        // be part of the animate element attributes.
+        if(animationDefinition.easing) {
+          // If already an easing Bézier curve array we take it or we lookup a easing array in the Easing object
+          easing = animationDefinition.easing instanceof Array ?
+            animationDefinition.easing :
+            Chartist.Svg.Easing[animationDefinition.easing];
+          delete animationDefinition.easing;
+        }
+
+        // If numeric dur or begin was provided we assume milli seconds
+        animationDefinition.begin = Chartist.ensureUnit(animationDefinition.begin, 'ms');
+        animationDefinition.dur = Chartist.ensureUnit(animationDefinition.dur, 'ms');
+
+        if(easing) {
+          animationDefinition.calcMode = 'spline';
+          animationDefinition.keySplines = easing.join(' ');
+          animationDefinition.keyTimes = '0;1';
+        }
+
+        // Adding "fill: freeze" if we are in guided mode and set initial attribute values
+        if(guided) {
+          animationDefinition.fill = 'freeze';
+          // Animated property on our element should already be set to the animation from value in guided mode
+          attributeProperties[attribute] = animationDefinition.from;
+          this.attr(attributeProperties);
+
+          // In guided mode we also set begin to indefinite so we can trigger the start manually and put the begin
+          // which needs to be in ms aside
+          timeout = Chartist.stripUnit(animationDefinition.begin || 0);
+          animationDefinition.begin = 'indefinite';
+        }
+
+        animate = this.elem('animate', Chartist.extend({
+          attributeName: attribute
+        }, animationDefinition));
+
+        if(guided) {
+          // If guided we take the value that was put aside in timeout and trigger the animation manually with a timeout
+          setTimeout(function() {
+            // If beginElement fails we set the animated attribute to the end position and remove the animate element
+            // This happens if the SMIL ElementTimeControl interface is not supported or any other problems occured in
+            // the browser. (Currently FF 34 does not support animate elements in foreignObjects)
+            try {
+              animate._node.beginElement();
+            } catch(err) {
+              // Set animated attribute to current animated value
+              attributeProperties[attribute] = animationDefinition.to;
+              this.attr(attributeProperties);
+              // Remove the animate element as it's no longer required
+              animate.remove();
+            }
+          }.bind(this), timeout);
+        }
+
+        if(eventEmitter) {
+          animate._node.addEventListener('beginEvent', function handleBeginEvent() {
+            eventEmitter.emit('animationBegin', {
+              element: this,
+              animate: animate._node,
+              params: animationDefinition
+            });
+          }.bind(this));
+        }
+
+        animate._node.addEventListener('endEvent', function handleEndEvent() {
+          if(eventEmitter) {
+            eventEmitter.emit('animationEnd', {
+              element: this,
+              animate: animate._node,
+              params: animationDefinition
+            });
+          }
+
+          if(guided) {
+            // Set animated attribute to current animated value
+            attributeProperties[attribute] = animationDefinition.to;
+            this.attr(attributeProperties);
+            // Remove the animate element as it's no longer required
+            animate.remove();
+          }
+        }.bind(this));
+      }
+
+      // If current attribute is an array of definition objects we create an animate for each and disable guided mode
+      if(animations[attribute] instanceof Array) {
+        animations[attribute].forEach(function(animationDefinition) {
+          createAnimate.bind(this)(animationDefinition, false);
+        }.bind(this));
+      } else {
+        createAnimate.bind(this)(animations[attribute], guided);
+      }
+
+    }.bind(this));
+
+    return this;
+  }
+
+  Chartist.Svg = Chartist.Class.extend({
+    constructor: Svg,
+    attr: attr,
+    elem: elem,
+    parent: parent,
+    root: root,
+    querySelector: querySelector,
+    querySelectorAll: querySelectorAll,
+    foreignObject: foreignObject,
+    text: text,
+    empty: empty,
+    remove: remove,
+    replace: replace,
+    append: append,
+    classes: classes,
+    addClass: addClass,
+    removeClass: removeClass,
+    removeAllClasses: removeAllClasses,
+    height: height,
+    width: width,
+    animate: animate
+  });
+
+  /**
+   * This method checks for support of a given SVG feature like Extensibility, SVG-animation or the like. Check http://www.w3.org/TR/SVG11/feature for a detailed list.
+   *
+   * @memberof Chartist.Svg
+   * @param {String} feature The SVG 1.1 feature that should be checked for support.
+   * @return {Boolean} True of false if the feature is supported or not
+   */
+  Chartist.Svg.isSupported = function(feature) {
+    return document.implementation.hasFeature('www.http://w3.org/TR/SVG11/feature#' + feature, '1.1');
+  };
+
+  /**
+   * This Object contains some standard easing cubic bezier curves. Then can be used with their name in the `Chartist.Svg.animate`. You can also extend the list and use your own name in the `animate` function. Click the show code button to see the available bezier functions.
+   *
+   * @memberof Chartist.Svg
+   */
+  var easingCubicBeziers = {
+    easeInSine: [0.47, 0, 0.745, 0.715],
+    easeOutSine: [0.39, 0.575, 0.565, 1],
+    easeInOutSine: [0.445, 0.05, 0.55, 0.95],
+    easeInQuad: [0.55, 0.085, 0.68, 0.53],
+    easeOutQuad: [0.25, 0.46, 0.45, 0.94],
+    easeInOutQuad: [0.455, 0.03, 0.515, 0.955],
+    easeInCubic: [0.55, 0.055, 0.675, 0.19],
+    easeOutCubic: [0.215, 0.61, 0.355, 1],
+    easeInOutCubic: [0.645, 0.045, 0.355, 1],
+    easeInQuart: [0.895, 0.03, 0.685, 0.22],
+    easeOutQuart: [0.165, 0.84, 0.44, 1],
+    easeInOutQuart: [0.77, 0, 0.175, 1],
+    easeInQuint: [0.755, 0.05, 0.855, 0.06],
+    easeOutQuint: [0.23, 1, 0.32, 1],
+    easeInOutQuint: [0.86, 0, 0.07, 1],
+    easeInExpo: [0.95, 0.05, 0.795, 0.035],
+    easeOutExpo: [0.19, 1, 0.22, 1],
+    easeInOutExpo: [1, 0, 0, 1],
+    easeInCirc: [0.6, 0.04, 0.98, 0.335],
+    easeOutCirc: [0.075, 0.82, 0.165, 1],
+    easeInOutCirc: [0.785, 0.135, 0.15, 0.86],
+    easeInBack: [0.6, -0.28, 0.735, 0.045],
+    easeOutBack: [0.175, 0.885, 0.32, 1.275],
+    easeInOutBack: [0.68, -0.55, 0.265, 1.55]
+  };
+
+  Chartist.Svg.Easing = easingCubicBeziers;
+
+  /**
+   * This helper class is to wrap multiple `Chartist.Svg` elements into a list where you can call the `Chartist.Svg` functions on all elements in the list with one call. This is helpful when you'd like to perform calls with `Chartist.Svg` on multiple elements.
+   * An instance of this class is also returned by `Chartist.Svg.querySelectorAll`.
+   *
+   * @memberof Chartist.Svg
+   * @param {Array<Node>|NodeList} nodeList An Array of SVG DOM nodes or a SVG DOM NodeList (as returned by document.querySelectorAll)
+   * @constructor
+   */
+  function SvgList(nodeList) {
+    var list = this;
+
+    this.svgElements = [];
+    for(var i = 0; i < nodeList.length; i++) {
+      this.svgElements.push(new Chartist.Svg(nodeList[i]));
+    }
+
+    // Add delegation methods for Chartist.Svg
+    Object.keys(Chartist.Svg.prototype).filter(function(prototypeProperty) {
+      return ['constructor',
+          'parent',
+          'querySelector',
+          'querySelectorAll',
+          'replace',
+          'append',
+          'classes',
+          'height',
+          'width'].indexOf(prototypeProperty) === -1;
+    }).forEach(function(prototypeProperty) {
+      list[prototypeProperty] = function() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        list.svgElements.forEach(function(element) {
+          Chartist.Svg.prototype[prototypeProperty].apply(element, args);
+        });
+        return list;
+      };
+    });
+  }
+
+  Chartist.Svg.List = Chartist.Class.extend({
+    constructor: SvgList
+  });
+}(window, document, Chartist));
+;/**
+ * Chartist SVG path module for SVG path description creation and modification.
+ *
+ * @module Chartist.Svg.Path
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  /**
+   * Contains the descriptors of supported element types in a SVG path. Currently only move, line and curve are supported.
+   *
+   * @memberof Chartist.Svg.Path
+   * @type {Object}
+   */
+  var elementDescriptions = {
+    m: ['x', 'y'],
+    l: ['x', 'y'],
+    c: ['x1', 'y1', 'x2', 'y2', 'x', 'y'],
+    a: ['rx', 'ry', 'xAr', 'lAf', 'sf', 'x', 'y']
+  };
+
+  /**
+   * Default options for newly created SVG path objects.
+   *
+   * @memberof Chartist.Svg.Path
+   * @type {Object}
+   */
+  var defaultOptions = {
+    // The accuracy in digit count after the decimal point. This will be used to round numbers in the SVG path. If this option is set to false then no rounding will be performed.
+    accuracy: 3
+  };
+
+  function element(command, params, pathElements, pos, relative, data) {
+    var pathElement = Chartist.extend({
+      command: relative ? command.toLowerCase() : command.toUpperCase()
+    }, params, data ? { data: data } : {} );
+
+    pathElements.splice(pos, 0, pathElement);
+  }
+
+  function forEachParam(pathElements, cb) {
+    pathElements.forEach(function(pathElement, pathElementIndex) {
+      elementDescriptions[pathElement.command.toLowerCase()].forEach(function(paramName, paramIndex) {
+        cb(pathElement, paramName, pathElementIndex, paramIndex, pathElements);
+      });
+    });
+  }
+
+  /**
+   * Used to construct a new path object.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Boolean} close If set to true then this path will be closed when stringified (with a Z at the end)
+   * @param {Object} options Options object that overrides the default objects. See default options for more details.
+   * @constructor
+   */
+  function SvgPath(close, options) {
+    this.pathElements = [];
+    this.pos = 0;
+    this.close = close;
+    this.options = Chartist.extend({}, defaultOptions, options);
+  }
+
+  /**
+   * Gets or sets the current position (cursor) inside of the path. You can move around the cursor freely but limited to 0 or the count of existing elements. All modifications with element functions will insert new elements at the position of this cursor.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} [pos] If a number is passed then the cursor is set to this position in the path element array.
+   * @return {Chartist.Svg.Path|Number} If the position parameter was passed then the return value will be the path object for easy call chaining. If no position parameter was passed then the current position is returned.
+   */
+  function position(pos) {
+    if(pos !== undefined) {
+      this.pos = Math.max(0, Math.min(this.pathElements.length, pos));
+      return this;
+    } else {
+      return this.pos;
+    }
+  }
+
+  /**
+   * Removes elements from the path starting at the current position.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} count Number of path elements that should be removed from the current position.
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function remove(count) {
+    this.pathElements.splice(this.pos, count);
+    return this;
+  }
+
+  /**
+   * Use this function to add a new move SVG path element.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} x The x coordinate for the move element.
+   * @param {Number} y The y coordinate for the move element.
+   * @param {Boolean} [relative] If set to true the move element will be created with relative coordinates (lowercase letter)
+   * @param {*} [data] Any data that should be stored with the element object that will be accessible in pathElement
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function move(x, y, relative, data) {
+    element('M', {
+      x: +x,
+      y: +y
+    }, this.pathElements, this.pos++, relative, data);
+    return this;
+  }
+
+  /**
+   * Use this function to add a new line SVG path element.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} x The x coordinate for the line element.
+   * @param {Number} y The y coordinate for the line element.
+   * @param {Boolean} [relative] If set to true the line element will be created with relative coordinates (lowercase letter)
+   * @param {*} [data] Any data that should be stored with the element object that will be accessible in pathElement
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function line(x, y, relative, data) {
+    element('L', {
+      x: +x,
+      y: +y
+    }, this.pathElements, this.pos++, relative, data);
+    return this;
+  }
+
+  /**
+   * Use this function to add a new curve SVG path element.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} x1 The x coordinate for the first control point of the bezier curve.
+   * @param {Number} y1 The y coordinate for the first control point of the bezier curve.
+   * @param {Number} x2 The x coordinate for the second control point of the bezier curve.
+   * @param {Number} y2 The y coordinate for the second control point of the bezier curve.
+   * @param {Number} x The x coordinate for the target point of the curve element.
+   * @param {Number} y The y coordinate for the target point of the curve element.
+   * @param {Boolean} [relative] If set to true the curve element will be created with relative coordinates (lowercase letter)
+   * @param {*} [data] Any data that should be stored with the element object that will be accessible in pathElement
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function curve(x1, y1, x2, y2, x, y, relative, data) {
+    element('C', {
+      x1: +x1,
+      y1: +y1,
+      x2: +x2,
+      y2: +y2,
+      x: +x,
+      y: +y
+    }, this.pathElements, this.pos++, relative, data);
+    return this;
+  }
+
+  /**
+   * Use this function to add a new non-bezier curve SVG path element.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} rx The radius to be used for the x-axis of the arc.
+   * @param {Number} ry The radius to be used for the y-axis of the arc.
+   * @param {Number} xAr Defines the orientation of the arc
+   * @param {Number} lAf Large arc flag
+   * @param {Number} sf Sweep flag
+   * @param {Number} x The x coordinate for the target point of the curve element.
+   * @param {Number} y The y coordinate for the target point of the curve element.
+   * @param {Boolean} [relative] If set to true the curve element will be created with relative coordinates (lowercase letter)
+   * @param {*} [data] Any data that should be stored with the element object that will be accessible in pathElement
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function arc(rx, ry, xAr, lAf, sf, x, y, relative, data) {
+    element('A', {
+      rx: +rx,
+      ry: +ry,
+      xAr: +xAr,
+      lAf: +lAf,
+      sf: +sf,
+      x: +x,
+      y: +y
+    }, this.pathElements, this.pos++, relative, data);
+    return this;
+  }
+
+  /**
+   * Parses an SVG path seen in the d attribute of path elements, and inserts the parsed elements into the existing path object at the current cursor position. Any closing path indicators (Z at the end of the path) will be ignored by the parser as this is provided by the close option in the options of the path object.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {String} path Any SVG path that contains move (m), line (l) or curve (c) components.
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function parse(path) {
+    // Parsing the SVG path string into an array of arrays [['M', '10', '10'], ['L', '100', '100']]
+    var chunks = path.replace(/([A-Za-z])([0-9])/g, '$1 $2')
+      .replace(/([0-9])([A-Za-z])/g, '$1 $2')
+      .split(/[\s,]+/)
+      .reduce(function(result, element) {
+        if(element.match(/[A-Za-z]/)) {
+          result.push([]);
+        }
+
+        result[result.length - 1].push(element);
+        return result;
+      }, []);
+
+    // If this is a closed path we remove the Z at the end because this is determined by the close option
+    if(chunks[chunks.length - 1][0].toUpperCase() === 'Z') {
+      chunks.pop();
+    }
+
+    // Using svgPathElementDescriptions to map raw path arrays into objects that contain the command and the parameters
+    // For example {command: 'M', x: '10', y: '10'}
+    var elements = chunks.map(function(chunk) {
+        var command = chunk.shift(),
+          description = elementDescriptions[command.toLowerCase()];
+
+        return Chartist.extend({
+          command: command
+        }, description.reduce(function(result, paramName, index) {
+          result[paramName] = +chunk[index];
+          return result;
+        }, {}));
+      });
+
+    // Preparing a splice call with the elements array as var arg params and insert the parsed elements at the current position
+    var spliceArgs = [this.pos, 0];
+    Array.prototype.push.apply(spliceArgs, elements);
+    Array.prototype.splice.apply(this.pathElements, spliceArgs);
+    // Increase the internal position by the element count
+    this.pos += elements.length;
+
+    return this;
+  }
+
+  /**
+   * This function renders to current SVG path object into a final SVG string that can be used in the d attribute of SVG path elements. It uses the accuracy option to round big decimals. If the close parameter was set in the constructor of this path object then a path closing Z will be appended to the output string.
+   *
+   * @memberof Chartist.Svg.Path
+   * @return {String}
+   */
+  function stringify() {
+    var accuracyMultiplier = Math.pow(10, this.options.accuracy);
+
+    return this.pathElements.reduce(function(path, pathElement) {
+        var params = elementDescriptions[pathElement.command.toLowerCase()].map(function(paramName) {
+          return this.options.accuracy ?
+            (Math.round(pathElement[paramName] * accuracyMultiplier) / accuracyMultiplier) :
+            pathElement[paramName];
+        }.bind(this));
+
+        return path + pathElement.command + params.join(',');
+      }.bind(this), '') + (this.close ? 'Z' : '');
+  }
+
+  /**
+   * Scales all elements in the current SVG path object. There is an individual parameter for each coordinate. Scaling will also be done for control points of curves, affecting the given coordinate.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} x The number which will be used to scale the x, x1 and x2 of all path elements.
+   * @param {Number} y The number which will be used to scale the y, y1 and y2 of all path elements.
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function scale(x, y) {
+    forEachParam(this.pathElements, function(pathElement, paramName) {
+      pathElement[paramName] *= paramName[0] === 'x' ? x : y;
+    });
+    return this;
+  }
+
+  /**
+   * Translates all elements in the current SVG path object. The translation is relative and there is an individual parameter for each coordinate. Translation will also be done for control points of curves, affecting the given coordinate.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Number} x The number which will be used to translate the x, x1 and x2 of all path elements.
+   * @param {Number} y The number which will be used to translate the y, y1 and y2 of all path elements.
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function translate(x, y) {
+    forEachParam(this.pathElements, function(pathElement, paramName) {
+      pathElement[paramName] += paramName[0] === 'x' ? x : y;
+    });
+    return this;
+  }
+
+  /**
+   * This function will run over all existing path elements and then loop over their attributes. The callback function will be called for every path element attribute that exists in the current path.
+   * The method signature of the callback function looks like this:
+   * ```javascript
+   * function(pathElement, paramName, pathElementIndex, paramIndex, pathElements)
+   * ```
+   * If something else than undefined is returned by the callback function, this value will be used to replace the old value. This allows you to build custom transformations of path objects that can't be achieved using the basic transformation functions scale and translate.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Function} transformFnc The callback function for the transformation. Check the signature in the function description.
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function transform(transformFnc) {
+    forEachParam(this.pathElements, function(pathElement, paramName, pathElementIndex, paramIndex, pathElements) {
+      var transformed = transformFnc(pathElement, paramName, pathElementIndex, paramIndex, pathElements);
+      if(transformed || transformed === 0) {
+        pathElement[paramName] = transformed;
+      }
+    });
+    return this;
+  }
+
+  /**
+   * This function clones a whole path object with all its properties. This is a deep clone and path element objects will also be cloned.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Boolean} [close] Optional option to set the new cloned path to closed. If not specified or false, the original path close option will be used.
+   * @return {Chartist.Svg.Path}
+   */
+  function clone(close) {
+    var c = new Chartist.Svg.Path(close || this.close);
+    c.pos = this.pos;
+    c.pathElements = this.pathElements.slice().map(function cloneElements(pathElement) {
+      return Chartist.extend({}, pathElement);
+    });
+    c.options = Chartist.extend({}, this.options);
+    return c;
+  }
+
+  /**
+   * Split a Svg.Path object by a specific command in the path chain. The path chain will be split and an array of newly created paths objects will be returned. This is useful if you'd like to split an SVG path by it's move commands, for example, in order to isolate chunks of drawings.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {String} command The command you'd like to use to split the path
+   * @return {Array<Chartist.Svg.Path>}
+   */
+  function splitByCommand(command) {
+    var split = [
+      new Chartist.Svg.Path()
+    ];
+
+    this.pathElements.forEach(function(pathElement) {
+      if(pathElement.command === command.toUpperCase() && split[split.length - 1].pathElements.length !== 0) {
+        split.push(new Chartist.Svg.Path());
+      }
+
+      split[split.length - 1].pathElements.push(pathElement);
+    });
+
+    return split;
+  }
+
+  /**
+   * This static function on `Chartist.Svg.Path` is joining multiple paths together into one paths.
+   *
+   * @memberof Chartist.Svg.Path
+   * @param {Array<Chartist.Svg.Path>} paths A list of paths to be joined together. The order is important.
+   * @param {boolean} close If the newly created path should be a closed path
+   * @param {Object} options Path options for the newly created path.
+   * @return {Chartist.Svg.Path}
+   */
+
+  function join(paths, close, options) {
+    var joinedPath = new Chartist.Svg.Path(close, options);
+    for(var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      for(var j = 0; j < path.pathElements.length; j++) {
+        joinedPath.pathElements.push(path.pathElements[j]);
+      }
+    }
+    return joinedPath;
+  }
+
+  Chartist.Svg.Path = Chartist.Class.extend({
+    constructor: SvgPath,
+    position: position,
+    remove: remove,
+    move: move,
+    line: line,
+    curve: curve,
+    arc: arc,
+    scale: scale,
+    translate: translate,
+    transform: transform,
+    parse: parse,
+    stringify: stringify,
+    clone: clone,
+    splitByCommand: splitByCommand
+  });
+
+  Chartist.Svg.Path.elementDescriptions = elementDescriptions;
+  Chartist.Svg.Path.join = join;
+}(window, document, Chartist));
+;/* global Chartist */
+(function (window, document, Chartist) {
+  'use strict';
+
+  var axisUnits = {
+    x: {
+      pos: 'x',
+      len: 'width',
+      dir: 'horizontal',
+      rectStart: 'x1',
+      rectEnd: 'x2',
+      rectOffset: 'y2'
+    },
+    y: {
+      pos: 'y',
+      len: 'height',
+      dir: 'vertical',
+      rectStart: 'y2',
+      rectEnd: 'y1',
+      rectOffset: 'x1'
+    }
+  };
+
+  function Axis(units, chartRect, ticks, options) {
+    this.units = units;
+    this.counterUnits = units === axisUnits.x ? axisUnits.y : axisUnits.x;
+    this.chartRect = chartRect;
+    this.axisLength = chartRect[units.rectEnd] - chartRect[units.rectStart];
+    this.gridOffset = chartRect[units.rectOffset];
+    this.ticks = ticks;
+    this.options = options;
+  }
+
+  function createGridAndLabels(gridGroup, labelGroup, useForeignObject, chartOptions, eventEmitter) {
+    var axisOptions = chartOptions['axis' + this.units.pos.toUpperCase()];
+    var projectedValues = this.ticks.map(this.projectValue.bind(this));
+    var labelValues = this.ticks.map(axisOptions.labelInterpolationFnc);
+
+    projectedValues.forEach(function(projectedValue, index) {
+      var labelOffset = {
+        x: 0,
+        y: 0
+      };
+
+      // TODO: Find better solution for solving this problem
+      // Calculate how much space we have available for the label
+      var labelLength;
+      if(projectedValues[index + 1]) {
+        // If we still have one label ahead, we can calculate the distance to the next tick / label
+        labelLength = projectedValues[index + 1] - projectedValue;
+      } else {
+        // If we don't have a label ahead and we have only two labels in total, we just take the remaining distance to
+        // on the whole axis length. We limit that to a minimum of 30 pixel, so that labels close to the border will
+        // still be visible inside of the chart padding.
+        labelLength = Math.max(this.axisLength - projectedValue, 30);
+      }
+
+      // Skip grid lines and labels where interpolated label values are falsey (execpt for 0)
+      if(!labelValues[index] && labelValues[index] !== 0) {
+        return;
+      }
+
+      // Transform to global coordinates using the chartRect
+      // We also need to set the label offset for the createLabel function
+      if(this.units.pos === 'x') {
+        projectedValue = this.chartRect.x1 + projectedValue;
+        labelOffset.x = chartOptions.axisX.labelOffset.x;
+
+        // If the labels should be positioned in start position (top side for vertical axis) we need to set a
+        // different offset as for positioned with end (bottom)
+        if(chartOptions.axisX.position === 'start') {
+          labelOffset.y = this.chartRect.padding.top + chartOptions.axisX.labelOffset.y + (useForeignObject ? 5 : 20);
+        } else {
+          labelOffset.y = this.chartRect.y1 + chartOptions.axisX.labelOffset.y + (useForeignObject ? 5 : 20);
+        }
+      } else {
+        projectedValue = this.chartRect.y1 - projectedValue;
+        labelOffset.y = chartOptions.axisY.labelOffset.y - (useForeignObject ? labelLength : 0);
+
+        // If the labels should be positioned in start position (left side for horizontal axis) we need to set a
+        // different offset as for positioned with end (right side)
+        if(chartOptions.axisY.position === 'start') {
+          labelOffset.x = useForeignObject ? this.chartRect.padding.left + chartOptions.axisY.labelOffset.x : this.chartRect.x1 - 10;
+        } else {
+          labelOffset.x = this.chartRect.x2 + chartOptions.axisY.labelOffset.x + 10;
+        }
+      }
+
+      if(axisOptions.showGrid) {
+        Chartist.createGrid(projectedValue, index, this, this.gridOffset, this.chartRect[this.counterUnits.len](), gridGroup, [
+          chartOptions.classNames.grid,
+          chartOptions.classNames[this.units.dir]
+        ], eventEmitter);
+      }
+
+      if(axisOptions.showLabel) {
+        Chartist.createLabel(projectedValue, labelLength, index, labelValues, this, axisOptions.offset, labelOffset, labelGroup, [
+          chartOptions.classNames.label,
+          chartOptions.classNames[this.units.dir],
+          chartOptions.classNames[axisOptions.position]
+        ], useForeignObject, eventEmitter);
+      }
+    }.bind(this));
+  }
+
+  Chartist.Axis = Chartist.Class.extend({
+    constructor: Axis,
+    createGridAndLabels: createGridAndLabels,
+    projectValue: function(value, index, data) {
+      throw new Error('Base axis can\'t be instantiated!');
+    }
+  });
+
+  Chartist.Axis.units = axisUnits;
+
+}(window, document, Chartist));
+;/**
+ * The auto scale axis uses standard linear scale projection of values along an axis. It uses order of magnitude to find a scale automatically and evaluates the available space in order to find the perfect amount of ticks for your chart.
+ * **Options**
+ * The following options are used by this axis in addition to the default axis options outlined in the axis configuration of the chart default settings.
+ * ```javascript
+ * var options = {
+ *   // If high is specified then the axis will display values explicitly up to this value and the computed maximum from the data is ignored
+ *   high: 100,
+ *   // If low is specified then the axis will display values explicitly down to this value and the computed minimum from the data is ignored
+ *   low: 0,
+ *   // This option will be used when finding the right scale division settings. The amount of ticks on the scale will be determined so that as many ticks as possible will be displayed, while not violating this minimum required space (in pixel).
+ *   scaleMinSpace: 20,
+ *   // Can be set to true or false. If set to true, the scale will be generated with whole numbers only.
+ *   onlyInteger: true,
+ *   // The reference value can be used to make sure that this value will always be on the chart. This is especially useful on bipolar charts where the bipolar center always needs to be part of the chart.
+ *   referenceValue: 5
+ * };
+ * ```
+ *
+ * @module Chartist.AutoScaleAxis
+ */
+/* global Chartist */
+(function (window, document, Chartist) {
+  'use strict';
+
+  function AutoScaleAxis(axisUnit, data, chartRect, options) {
+    // Usually we calculate highLow based on the data but this can be overriden by a highLow object in the options
+    var highLow = options.highLow || Chartist.getHighLow(data.normalized, options, axisUnit.pos);
+    this.bounds = Chartist.getBounds(chartRect[axisUnit.rectEnd] - chartRect[axisUnit.rectStart], highLow, options.scaleMinSpace || 20, options.referenceValue, options.onlyInteger);
+    this.range = {
+      min: this.bounds.min,
+      max: this.bounds.max
+    };
+
+    Chartist.AutoScaleAxis.super.constructor.call(this,
+      axisUnit,
+      chartRect,
+      this.bounds.values,
+      options);
+  }
+
+  function projectValue(value) {
+    return this.axisLength * (+Chartist.getMultiValue(value, this.units.pos) - this.bounds.min) / this.bounds.range;
+  }
+
+  Chartist.AutoScaleAxis = Chartist.Axis.extend({
+    constructor: AutoScaleAxis,
+    projectValue: projectValue
+  });
+
+}(window, document, Chartist));
+;/**
+ * The fixed scale axis uses standard linear projection of values along an axis. It makes use of a divisor option to divide the range provided from the minimum and maximum value or the options high and low that will override the computed minimum and maximum.
+ * **Options**
+ * The following options are used by this axis in addition to the default axis options outlined in the axis configuration of the chart default settings.
+ * ```javascript
+ * var options = {
+ *   // If high is specified then the axis will display values explicitly up to this value and the computed maximum from the data is ignored
+ *   high: 100,
+ *   // If low is specified then the axis will display values explicitly down to this value and the computed minimum from the data is ignored
+ *   low: 0,
+ *   // If specified then the value range determined from minimum to maximum (or low and high) will be divided by this number and ticks will be generated at those division points. The default divisor is 1.
+ *   divisor: 4,
+ *   // If ticks is explicitly set, then the axis will not compute the ticks with the divisor, but directly use the data in ticks to determine at what points on the axis a tick need to be generated.
+ *   ticks: [1, 10, 20, 30]
+ * };
+ * ```
+ *
+ * @module Chartist.FixedScaleAxis
+ */
+/* global Chartist */
+(function (window, document, Chartist) {
+  'use strict';
+
+  function FixedScaleAxis(axisUnit, data, chartRect, options) {
+    var highLow = Chartist.getHighLow(data.normalized, options, axisUnit.pos);
+    this.divisor = options.divisor || 1;
+    this.ticks = options.ticks || Chartist.times(this.divisor).map(function(value, index) {
+      return highLow.low + (highLow.high - highLow.low) / this.divisor * index;
+    }.bind(this));
+    this.range = {
+      min: highLow.low,
+      max: highLow.high
+    };
+
+    Chartist.FixedScaleAxis.super.constructor.call(this,
+      axisUnit,
+      chartRect,
+      this.ticks,
+      options);
+
+    this.stepLength = this.axisLength / this.divisor;
+  }
+
+  function projectValue(value) {
+    return this.axisLength * (+Chartist.getMultiValue(value, this.units.pos) - this.range.min) / (this.range.max - this.range.min);
+  }
+
+  Chartist.FixedScaleAxis = Chartist.Axis.extend({
+    constructor: FixedScaleAxis,
+    projectValue: projectValue
+  });
+
+}(window, document, Chartist));
+;/**
+ * The step axis for step based charts like bar chart or step based line charts. It uses a fixed amount of ticks that will be equally distributed across the while axis length. The projection is done using the index of the data value rather than the value itself and therefore it's only useful for distribution purpose.
+ * **Options**
+ * The following options are used by this axis in addition to the default axis options outlined in the axis configuration of the chart default settings.
+ * ```javascript
+ * var options = {
+ *   // Ticks to be used to distribute across the axis length. As this axis type relies on the index of the value rather than the value, arbitrary data that can be converted to a string can be used as ticks.
+ *   ticks: ['One', 'Two', 'Three'],
+ *   // If set to true the full width will be used to distribute the values where the last value will be at the maximum of the axis length. If false the spaces between the ticks will be evenly distributed instead.
+ *   stretch: true
+ * };
+ * ```
+ *
+ * @module Chartist.StepAxis
+ */
+/* global Chartist */
+(function (window, document, Chartist) {
+  'use strict';
+
+  function StepAxis(axisUnit, data, chartRect, options) {
+    Chartist.StepAxis.super.constructor.call(this,
+      axisUnit,
+      chartRect,
+      options.ticks,
+      options);
+
+    this.stepLength = this.axisLength / (options.ticks.length - (options.stretch ? 1 : 0));
+  }
+
+  function projectValue(value, index) {
+    return this.stepLength * index;
+  }
+
+  Chartist.StepAxis = Chartist.Axis.extend({
+    constructor: StepAxis,
+    projectValue: projectValue
+  });
+
+}(window, document, Chartist));
+;/**
+ * The Chartist line chart can be used to draw Line or Scatter charts. If used in the browser you can access the global `Chartist` namespace where you find the `Line` function as a main entry point.
+ *
+ * For examples on how to use the line chart please check the examples of the `Chartist.Line` method.
+ *
+ * @module Chartist.Line
+ */
+/* global Chartist */
+(function(window, document, Chartist){
+  'use strict';
+
+  /**
+   * Default options in line charts. Expand the code view to see a detailed list of options with comments.
+   *
+   * @memberof Chartist.Line
+   */
+  var defaultOptions = {
+    // Options for X-Axis
+    axisX: {
+      // The offset of the labels to the chart area
+      offset: 30,
+      // Position where labels are placed. Can be set to `start` or `end` where `start` is equivalent to left or top on vertical axis and `end` is equivalent to right or bottom on horizontal axis.
+      position: 'end',
+      // Allows you to correct label positioning on this axis by positive or negative x and y offset.
+      labelOffset: {
+        x: 0,
+        y: 0
+      },
+      // If labels should be shown or not
+      showLabel: true,
+      // If the axis grid should be drawn or not
+      showGrid: true,
+      // Interpolation function that allows you to intercept the value from the axis label
+      labelInterpolationFnc: Chartist.noop,
+      // Set the axis type to be used to project values on this axis. If not defined, Chartist.StepAxis will be used for the X-Axis, where the ticks option will be set to the labels in the data and the stretch option will be set to the global fullWidth option. This type can be changed to any axis constructor available (e.g. Chartist.FixedScaleAxis), where all axis options should be present here.
+      type: undefined
+    },
+    // Options for Y-Axis
+    axisY: {
+      // The offset of the labels to the chart area
+      offset: 40,
+      // Position where labels are placed. Can be set to `start` or `end` where `start` is equivalent to left or top on vertical axis and `end` is equivalent to right or bottom on horizontal axis.
+      position: 'start',
+      // Allows you to correct label positioning on this axis by positive or negative x and y offset.
+      labelOffset: {
+        x: 0,
+        y: 0
+      },
+      // If labels should be shown or not
+      showLabel: true,
+      // If the axis grid should be drawn or not
+      showGrid: true,
+      // Interpolation function that allows you to intercept the value from the axis label
+      labelInterpolationFnc: Chartist.noop,
+      // Set the axis type to be used to project values on this axis. If not defined, Chartist.AutoScaleAxis will be used for the Y-Axis, where the high and low options will be set to the global high and low options. This type can be changed to any axis constructor available (e.g. Chartist.FixedScaleAxis), where all axis options should be present here.
+      type: undefined,
+      // This value specifies the minimum height in pixel of the scale steps
+      scaleMinSpace: 20,
+      // Use only integer values (whole numbers) for the scale steps
+      onlyInteger: false
+    },
+    // Specify a fixed width for the chart as a string (i.e. '100px' or '50%')
+    width: undefined,
+    // Specify a fixed height for the chart as a string (i.e. '100px' or '50%')
+    height: undefined,
+    // If the line should be drawn or not
+    showLine: true,
+    // If dots should be drawn or not
+    showPoint: true,
+    // If the line chart should draw an area
+    showArea: false,
+    // The base for the area chart that will be used to close the area shape (is normally 0)
+    areaBase: 0,
+    // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
+    lineSmooth: true,
+    // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value
+    low: undefined,
+    // Overriding the natural high of the chart allows you to zoom in or limit the charts highest displayed value
+    high: undefined,
+    // Padding of the chart drawing area to the container element and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
+    chartPadding: {
+      top: 15,
+      right: 15,
+      bottom: 5,
+      left: 10
+    },
+    // When set to true, the last grid line on the x-axis is not drawn and the chart elements will expand to the full available width of the chart. For the last label to be drawn correctly you might need to add chart padding or offset the last label with a draw event handler.
+    fullWidth: false,
+    // If true the whole data is reversed including labels, the series order as well as the whole series data arrays.
+    reverseData: false,
+    // Override the class names that get used to generate the SVG structure of the chart
+    classNames: {
+      chart: 'ct-chart-line',
+      label: 'ct-label',
+      labelGroup: 'ct-labels',
+      series: 'ct-series',
+      line: 'ct-line',
+      point: 'ct-point',
+      area: 'ct-area',
+      grid: 'ct-grid',
+      gridGroup: 'ct-grids',
+      vertical: 'ct-vertical',
+      horizontal: 'ct-horizontal',
+      start: 'ct-start',
+      end: 'ct-end'
+    }
+  };
+
+  /**
+   * Creates a new chart
+   *
+   */
+  function createChart(options) {
+    var data = {
+      raw: this.data,
+      normalized: Chartist.getDataArray(this.data, options.reverseData, true)
+    };
+
+    // Create new svg object
+    this.svg = Chartist.createSvg(this.container, options.width, options.height, options.classNames.chart);
+    // Create groups for labels, grid and series
+    var gridGroup = this.svg.elem('g').addClass(options.classNames.gridGroup);
+    var seriesGroup = this.svg.elem('g');
+    var labelGroup = this.svg.elem('g').addClass(options.classNames.labelGroup);
+
+    var chartRect = Chartist.createChartRect(this.svg, options, defaultOptions.padding);
+    var axisX, axisY;
+
+    if(options.axisX.type === undefined) {
+      axisX = new Chartist.StepAxis(Chartist.Axis.units.x, data, chartRect, Chartist.extend({}, options.axisX, {
+        ticks: data.raw.labels,
+        stretch: options.fullWidth
+      }));
+    } else {
+      axisX = options.axisX.type.call(Chartist, Chartist.Axis.units.x, data, chartRect, options.axisX);
+    }
+
+    if(options.axisY.type === undefined) {
+      axisY = new Chartist.AutoScaleAxis(Chartist.Axis.units.y, data, chartRect, Chartist.extend({}, options.axisY, {
+        high: Chartist.isNum(options.high) ? options.high : options.axisY.high,
+        low: Chartist.isNum(options.low) ? options.low : options.axisY.low
+      }));
+    } else {
+      axisY = options.axisY.type.call(Chartist, Chartist.Axis.units.y, data, chartRect, options.axisY);
+    }
+
+    axisX.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
+    axisY.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
+
+    // Draw the series
+    data.raw.series.forEach(function(series, seriesIndex) {
+      var seriesElement = seriesGroup.elem('g');
+
+      // Write attributes to series group element. If series name or meta is undefined the attributes will not be written
+      seriesElement.attr({
+        'series-name': series.name,
+        'meta': Chartist.serialize(series.meta)
+      }, Chartist.xmlNs.uri);
+
+      // Use series class from series data or if not set generate one
+      seriesElement.addClass([
+        options.classNames.series,
+        (series.className || options.classNames.series + '-' + Chartist.alphaNumerate(seriesIndex))
+      ].join(' '));
+
+      var pathCoordinates = [],
+        pathData = [];
+
+      data.normalized[seriesIndex].forEach(function(value, valueIndex) {
+        var p = {
+          x: chartRect.x1 + axisX.projectValue(value, valueIndex, data.normalized[seriesIndex]),
+          y: chartRect.y1 - axisY.projectValue(value, valueIndex, data.normalized[seriesIndex])
+        };
+        pathCoordinates.push(p.x, p.y);
+        pathData.push({
+          value: value,
+          valueIndex: valueIndex,
+          meta: Chartist.getMetaData(series, valueIndex)
+        });
+      }.bind(this));
+
+      var seriesOptions = {
+        lineSmooth: Chartist.getSeriesOption(series, options, 'lineSmooth'),
+        showPoint: Chartist.getSeriesOption(series, options, 'showPoint'),
+        showLine: Chartist.getSeriesOption(series, options, 'showLine'),
+        showArea: Chartist.getSeriesOption(series, options, 'showArea'),
+        areaBase: Chartist.getSeriesOption(series, options, 'areaBase')
+      };
+
+      var smoothing = typeof seriesOptions.lineSmooth === 'function' ?
+        seriesOptions.lineSmooth : (seriesOptions.lineSmooth ? Chartist.Interpolation.cardinal() : Chartist.Interpolation.none());
+      // Interpolating path where pathData will be used to annotate each path element so we can trace back the original
+      // index, value and meta data
+      var path = smoothing(pathCoordinates, pathData);
+
+      // If we should show points we need to create them now to avoid secondary loop
+      // Points are drawn from the pathElements returned by the interpolation function
+      // Small offset for Firefox to render squares correctly
+      if (seriesOptions.showPoint) {
+
+        path.pathElements.forEach(function(pathElement) {
+          var point = seriesElement.elem('line', {
+            x1: pathElement.x,
+            y1: pathElement.y,
+            x2: pathElement.x + 0.01,
+            y2: pathElement.y
+          }, options.classNames.point).attr({
+            'value': pathElement.data.value.x === undefined ? pathElement.data.value.y : pathElement.data.value.x + ',' + pathElement.data.value.y,
+            'meta': pathElement.data.meta
+          }, Chartist.xmlNs.uri);
+
+          this.eventEmitter.emit('draw', {
+            type: 'point',
+            value: pathElement.data.value,
+            index: pathElement.data.valueIndex,
+            meta: pathElement.data.meta,
+            series: series,
+            seriesIndex: seriesIndex,
+            group: seriesElement,
+            element: point,
+            x: pathElement.x,
+            y: pathElement.y
+          });
+        }.bind(this));
+      }
+
+      if(seriesOptions.showLine) {
+        var line = seriesElement.elem('path', {
+          d: path.stringify()
+        }, options.classNames.line, true);
+
+        this.eventEmitter.emit('draw', {
+          type: 'line',
+          values: data.normalized[seriesIndex],
+          path: path.clone(),
+          chartRect: chartRect,
+          index: seriesIndex,
+          series: series,
+          seriesIndex: seriesIndex,
+          group: seriesElement,
+          element: line
+        });
+      }
+
+      // Area currently only works with axes that support a range!
+      if(seriesOptions.showArea && axisY.range) {
+        // If areaBase is outside the chart area (< min or > max) we need to set it respectively so that
+        // the area is not drawn outside the chart area.
+        var areaBase = Math.max(Math.min(seriesOptions.areaBase, axisY.range.max), axisY.range.min);
+
+        // We project the areaBase value into screen coordinates
+        var areaBaseProjected = chartRect.y1 - axisY.projectValue(areaBase);
+
+        // In order to form the area we'll first split the path by move commands so we can chunk it up into segments
+        path.splitByCommand('M').filter(function onlySolidSegments(pathSegment) {
+          // We filter only "solid" segments that contain more than one point. Otherwise there's no need for an area
+          return pathSegment.pathElements.length > 1;
+        }).map(function convertToArea(solidPathSegments) {
+          // Receiving the filtered solid path segments we can now convert those segments into fill areas
+          var firstElement = solidPathSegments.pathElements[0];
+          var lastElement = solidPathSegments.pathElements[solidPathSegments.pathElements.length - 1];
+
+          // Cloning the solid path segment with closing option and removing the first move command from the clone
+          // We then insert a new move that should start at the area base and draw a straight line up or down
+          // at the end of the path we add an additional straight line to the projected area base value
+          // As the closing option is set our path will be automatically closed
+          return solidPathSegments.clone(true)
+            .position(0)
+            .remove(1)
+            .move(firstElement.x, areaBaseProjected)
+            .line(firstElement.x, firstElement.y)
+            .position(solidPathSegments.pathElements.length + 1)
+            .line(lastElement.x, areaBaseProjected);
+
+        }).forEach(function createArea(areaPath) {
+          // For each of our newly created area paths, we'll now create path elements by stringifying our path objects
+          // and adding the created DOM elements to the correct series group
+          var area = seriesElement.elem('path', {
+            d: areaPath.stringify()
+          }, options.classNames.area, true).attr({
+            'values': data.normalized[seriesIndex]
+          }, Chartist.xmlNs.uri);
+
+          // Emit an event for each area that was drawn
+          this.eventEmitter.emit('draw', {
+            type: 'area',
+            values: data.normalized[seriesIndex],
+            path: areaPath.clone(),
+            series: series,
+            seriesIndex: seriesIndex,
+            chartRect: chartRect,
+            index: seriesIndex,
+            group: seriesElement,
+            element: area
+          });
+        }.bind(this));
+      }
+    }.bind(this));
+
+    this.eventEmitter.emit('created', {
+      bounds: axisY.bounds,
+      chartRect: chartRect,
+      axisX: axisX,
+      axisY: axisY,
+      svg: this.svg,
+      options: options
+    });
+  }
+
+  /**
+   * This method creates a new line chart.
+   *
+   * @memberof Chartist.Line
+   * @param {String|Node} query A selector query string or directly a DOM element
+   * @param {Object} data The data object that needs to consist of a labels and a series array
+   * @param {Object} [options] The options object with options that override the default options. Check the examples for a detailed list.
+   * @param {Array} [responsiveOptions] Specify an array of responsive option arrays which are a media query and options object pair => [[mediaQueryString, optionsObject],[more...]]
+   * @return {Object} An object which exposes the API for the created chart
+   *
+   * @example
+   * // Create a simple line chart
+   * var data = {
+   *   // A labels array that can contain any sort of values
+   *   labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+   *   // Our series array that contains series objects or in this case series data arrays
+   *   series: [
+   *     [5, 2, 4, 2, 0]
+   *   ]
+   * };
+   *
+   * // As options we currently only set a static size of 300x200 px
+   * var options = {
+   *   width: '300px',
+   *   height: '200px'
+   * };
+   *
+   * // In the global name space Chartist we call the Line function to initialize a line chart. As a first parameter we pass in a selector where we would like to get our chart created. Second parameter is the actual data object and as a third parameter we pass in our options
+   * new Chartist.Line('.ct-chart', data, options);
+   *
+   * @example
+   * // Use specific interpolation function with configuration from the Chartist.Interpolation module
+   *
+   * var chart = new Chartist.Line('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5],
+   *   series: [
+   *     [1, 1, 8, 1, 7]
+   *   ]
+   * }, {
+   *   lineSmooth: Chartist.Interpolation.cardinal({
+   *     tension: 0.2
+   *   })
+   * });
+   *
+   * @example
+   * // Create a line chart with responsive options
+   *
+   * var data = {
+   *   // A labels array that can contain any sort of values
+   *   labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+   *   // Our series array that contains series objects or in this case series data arrays
+   *   series: [
+   *     [5, 2, 4, 2, 0]
+   *   ]
+   * };
+   *
+   * // In adition to the regular options we specify responsive option overrides that will override the default configutation based on the matching media queries.
+   * var responsiveOptions = [
+   *   ['screen and (min-width: 641px) and (max-width: 1024px)', {
+   *     showPoint: false,
+   *     axisX: {
+   *       labelInterpolationFnc: function(value) {
+   *         // Will return Mon, Tue, Wed etc. on medium screens
+   *         return value.slice(0, 3);
+   *       }
+   *     }
+   *   }],
+   *   ['screen and (max-width: 640px)', {
+   *     showLine: false,
+   *     axisX: {
+   *       labelInterpolationFnc: function(value) {
+   *         // Will return M, T, W etc. on small screens
+   *         return value[0];
+   *       }
+   *     }
+   *   }]
+   * ];
+   *
+   * new Chartist.Line('.ct-chart', data, null, responsiveOptions);
+   *
+   */
+  function Line(query, data, options, responsiveOptions) {
+    Chartist.Line.super.constructor.call(this,
+      query,
+      data,
+      defaultOptions,
+      Chartist.extend({}, defaultOptions, options),
+      responsiveOptions);
+  }
+
+  // Creating line chart type in Chartist namespace
+  Chartist.Line = Chartist.Base.extend({
+    constructor: Line,
+    createChart: createChart
+  });
+
+}(window, document, Chartist));
+;/**
+ * The bar chart module of Chartist that can be used to draw unipolar or bipolar bar and grouped bar charts.
+ *
+ * @module Chartist.Bar
+ */
+/* global Chartist */
+(function(window, document, Chartist){
+  'use strict';
+
+  /**
+   * Default options in bar charts. Expand the code view to see a detailed list of options with comments.
+   *
+   * @memberof Chartist.Bar
+   */
+  var defaultOptions = {
+    // Options for X-Axis
+    axisX: {
+      // The offset of the chart drawing area to the border of the container
+      offset: 30,
+      // Position where labels are placed. Can be set to `start` or `end` where `start` is equivalent to left or top on vertical axis and `end` is equivalent to right or bottom on horizontal axis.
+      position: 'end',
+      // Allows you to correct label positioning on this axis by positive or negative x and y offset.
+      labelOffset: {
+        x: 0,
+        y: 0
+      },
+      // If labels should be shown or not
+      showLabel: true,
+      // If the axis grid should be drawn or not
+      showGrid: true,
+      // Interpolation function that allows you to intercept the value from the axis label
+      labelInterpolationFnc: Chartist.noop,
+      // This value specifies the minimum width in pixel of the scale steps
+      scaleMinSpace: 30,
+      // Use only integer values (whole numbers) for the scale steps
+      onlyInteger: false
+    },
+    // Options for Y-Axis
+    axisY: {
+      // The offset of the chart drawing area to the border of the container
+      offset: 40,
+      // Position where labels are placed. Can be set to `start` or `end` where `start` is equivalent to left or top on vertical axis and `end` is equivalent to right or bottom on horizontal axis.
+      position: 'start',
+      // Allows you to correct label positioning on this axis by positive or negative x and y offset.
+      labelOffset: {
+        x: 0,
+        y: 0
+      },
+      // If labels should be shown or not
+      showLabel: true,
+      // If the axis grid should be drawn or not
+      showGrid: true,
+      // Interpolation function that allows you to intercept the value from the axis label
+      labelInterpolationFnc: Chartist.noop,
+      // This value specifies the minimum height in pixel of the scale steps
+      scaleMinSpace: 20,
+      // Use only integer values (whole numbers) for the scale steps
+      onlyInteger: false
+    },
+    // Specify a fixed width for the chart as a string (i.e. '100px' or '50%')
+    width: undefined,
+    // Specify a fixed height for the chart as a string (i.e. '100px' or '50%')
+    height: undefined,
+    // Overriding the natural high of the chart allows you to zoom in or limit the charts highest displayed value
+    high: undefined,
+    // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value
+    low: undefined,
+    // Use only integer values (whole numbers) for the scale steps
+    onlyInteger: false,
+    // Padding of the chart drawing area to the container element and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
+    chartPadding: {
+      top: 15,
+      right: 15,
+      bottom: 5,
+      left: 10
+    },
+    // Specify the distance in pixel of bars in a group
+    seriesBarDistance: 15,
+    // If set to true this property will cause the series bars to be stacked and form a total for each series point. This will also influence the y-axis and the overall bounds of the chart. In stacked mode the seriesBarDistance property will have no effect.
+    stackBars: false,
+    // Inverts the axes of the bar chart in order to draw a horizontal bar chart. Be aware that you also need to invert your axis settings as the Y Axis will now display the labels and the X Axis the values.
+    horizontalBars: false,
+    // If set to true then each bar will represent a series and the data array is expected to be a one dimensional array of data values rather than a series array of series. This is useful if the bar chart should represent a profile rather than some data over time.
+    distributeSeries: false,
+    // If true the whole data is reversed including labels, the series order as well as the whole series data arrays.
+    reverseData: false,
+    // Override the class names that get used to generate the SVG structure of the chart
+    classNames: {
+      chart: 'ct-chart-bar',
+      horizontalBars: 'ct-horizontal-bars',
+      label: 'ct-label',
+      labelGroup: 'ct-labels',
+      series: 'ct-series',
+      bar: 'ct-bar',
+      grid: 'ct-grid',
+      gridGroup: 'ct-grids',
+      vertical: 'ct-vertical',
+      horizontal: 'ct-horizontal',
+      start: 'ct-start',
+      end: 'ct-end'
+    }
+  };
+
+  /**
+   * Creates a new chart
+   *
+   */
+  function createChart(options) {
+    var data = {
+      raw: this.data,
+      normalized: options.distributeSeries ? Chartist.getDataArray(this.data, options.reverseData).map(function(value) {
+        return [value];
+      }) : Chartist.getDataArray(this.data, options.reverseData)
+    };
+
+    var highLow;
+
+    // Create new svg element
+    this.svg = Chartist.createSvg(
+      this.container,
+      options.width,
+      options.height,
+      options.classNames.chart + (options.horizontalBars ? ' ' + options.classNames.horizontalBars : '')
+    );
+
+    // Drawing groups in correct order
+    var gridGroup = this.svg.elem('g').addClass(options.classNames.gridGroup);
+    var seriesGroup = this.svg.elem('g');
+    var labelGroup = this.svg.elem('g').addClass(options.classNames.labelGroup);
+
+    if(options.stackBars) {
+      // If stacked bars we need to calculate the high low from stacked values from each series
+      var serialSums = Chartist.serialMap(data.normalized, function serialSums() {
+        return Array.prototype.slice.call(arguments).reduce(Chartist.sum, 0);
+      });
+
+      highLow = Chartist.getHighLow([serialSums], options);
+    } else {
+      highLow = Chartist.getHighLow(data.normalized, options);
+    }
+    // Overrides of high / low from settings
+    highLow.high = +options.high || (options.high === 0 ? 0 : highLow.high);
+    highLow.low = +options.low || (options.low === 0 ? 0 : highLow.low);
+
+    var chartRect = Chartist.createChartRect(this.svg, options, defaultOptions.padding);
+
+    var valueAxis,
+      labelAxisTicks,
+      labelAxis,
+      axisX,
+      axisY;
+
+    // We need to set step count based on some options combinations
+    if(options.distributeSeries && options.stackBars) {
+      // If distributed series are enabled and bars need to be stacked, we'll only have one bar and therefore should
+      // use only the first label for the step axis
+      labelAxisTicks = data.raw.labels.slice(0, 1);
+    } else {
+      // If distributed series are enabled but stacked bars aren't, we should use the series labels
+      // If we are drawing a regular bar chart with two dimensional series data, we just use the labels array
+      // as the bars are normalized
+      labelAxisTicks = data.raw.labels;
+    }
+
+    // Set labelAxis and valueAxis based on the horizontalBars setting. This setting will flip the axes if necessary.
+    if(options.horizontalBars) {
+      labelAxis = axisY = new Chartist.StepAxis(Chartist.Axis.units.y, data, chartRect, {
+        ticks: labelAxisTicks
+      });
+
+      valueAxis = axisX = new Chartist.AutoScaleAxis(Chartist.Axis.units.x, data, chartRect, Chartist.extend({}, options.axisX, {
+        highLow: highLow,
+        referenceValue: 0
+      }));
+    } else {
+      labelAxis = axisX = new Chartist.StepAxis(Chartist.Axis.units.x, data, chartRect, {
+        ticks: labelAxisTicks
+      });
+
+      valueAxis = axisY = new Chartist.AutoScaleAxis(Chartist.Axis.units.y, data, chartRect, Chartist.extend({}, options.axisY, {
+        highLow: highLow,
+        referenceValue: 0
+      }));
+    }
+
+    // Projected 0 point
+    var zeroPoint = options.horizontalBars ? (chartRect.x1 + valueAxis.projectValue(0)) : (chartRect.y1 - valueAxis.projectValue(0));
+    // Used to track the screen coordinates of stacked bars
+    var stackedBarValues = [];
+
+    labelAxis.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
+    valueAxis.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
+
+    // Draw the series
+    data.raw.series.forEach(function(series, seriesIndex) {
+      // Calculating bi-polar value of index for seriesOffset. For i = 0..4 biPol will be -1.5, -0.5, 0.5, 1.5 etc.
+      var biPol = seriesIndex - (data.raw.series.length - 1) / 2;
+      // Half of the period width between vertical grid lines used to position bars
+      var periodHalfLength;
+      // Current series SVG element
+      var seriesElement;
+
+      // We need to set periodHalfLength based on some options combinations
+      if(options.distributeSeries && !options.stackBars) {
+        // If distributed series are enabled but stacked bars aren't, we need to use the length of the normaizedData array
+        // which is the series count and divide by 2
+        periodHalfLength = labelAxis.axisLength / data.normalized.length / 2;
+      } else if(options.distributeSeries && options.stackBars) {
+        // If distributed series and stacked bars are enabled we'll only get one bar so we should just divide the axis
+        // length by 2
+        periodHalfLength = labelAxis.axisLength / 2;
+      } else {
+        // On regular bar charts we should just use the series length
+        periodHalfLength = labelAxis.axisLength / data.normalized[seriesIndex].length / 2;
+      }
+
+      // Adding the series group to the series element
+      seriesElement = seriesGroup.elem('g');
+
+      // Write attributes to series group element. If series name or meta is undefined the attributes will not be written
+      seriesElement.attr({
+        'series-name': series.name,
+        'meta': Chartist.serialize(series.meta)
+      }, Chartist.xmlNs.uri);
+
+      // Use series class from series data or if not set generate one
+      seriesElement.addClass([
+        options.classNames.series,
+        (series.className || options.classNames.series + '-' + Chartist.alphaNumerate(seriesIndex))
+      ].join(' '));
+
+      data.normalized[seriesIndex].forEach(function(value, valueIndex) {
+        var projected,
+          bar,
+          previousStack,
+          labelAxisValueIndex;
+
+        // We need to set labelAxisValueIndex based on some options combinations
+        if(options.distributeSeries && !options.stackBars) {
+          // If distributed series are enabled but stacked bars aren't, we can use the seriesIndex for later projection
+          // on the step axis for label positioning
+          labelAxisValueIndex = seriesIndex;
+        } else if(options.distributeSeries && options.stackBars) {
+          // If distributed series and stacked bars are enabled, we will only get one bar and therefore always use
+          // 0 for projection on the label step axis
+          labelAxisValueIndex = 0;
+        } else {
+          // On regular bar charts we just use the value index to project on the label step axis
+          labelAxisValueIndex = valueIndex;
+        }
+
+        // We need to transform coordinates differently based on the chart layout
+        if(options.horizontalBars) {
+          projected = {
+            x: chartRect.x1 + valueAxis.projectValue(value || 0, valueIndex, data.normalized[seriesIndex]),
+            y: chartRect.y1 - labelAxis.projectValue(value || 0, labelAxisValueIndex, data.normalized[seriesIndex])
+          };
+        } else {
+          projected = {
+            x: chartRect.x1 + labelAxis.projectValue(value || 0, labelAxisValueIndex, data.normalized[seriesIndex]),
+            y: chartRect.y1 - valueAxis.projectValue(value || 0, valueIndex, data.normalized[seriesIndex])
+          }
+        }
+
+        // Offset to center bar between grid lines
+        projected[labelAxis.units.pos] += periodHalfLength * (options.horizontalBars ? -1 : 1);
+        // Using bi-polar offset for multiple series if no stacked bars or series distribution is used
+        projected[labelAxis.units.pos] += (options.stackBars || options.distributeSeries) ? 0 : biPol * options.seriesBarDistance * (options.horizontalBars ? -1 : 1);
+
+        // Enter value in stacked bar values used to remember previous screen value for stacking up bars
+        previousStack = stackedBarValues[valueIndex] || zeroPoint;
+        stackedBarValues[valueIndex] = previousStack - (zeroPoint - projected[labelAxis.counterUnits.pos]);
+
+        // Skip if value is undefined
+        if(value === undefined) {
+          return;
+        }
+
+        var positions = {};
+        positions[labelAxis.units.pos + '1'] = projected[labelAxis.units.pos];
+        positions[labelAxis.units.pos + '2'] = projected[labelAxis.units.pos];
+        // If bars are stacked we use the stackedBarValues reference and otherwise base all bars off the zero line
+        positions[labelAxis.counterUnits.pos + '1'] = options.stackBars ? previousStack : zeroPoint;
+        positions[labelAxis.counterUnits.pos + '2'] = options.stackBars ? stackedBarValues[valueIndex] : projected[labelAxis.counterUnits.pos];
+
+        bar = seriesElement.elem('line', positions, options.classNames.bar).attr({
+          'value': value,
+          'meta': Chartist.getMetaData(series, valueIndex)
+        }, Chartist.xmlNs.uri);
+
+        this.eventEmitter.emit('draw', Chartist.extend({
+          type: 'bar',
+          value: value,
+          index: valueIndex,
+          meta: Chartist.getMetaData(series, valueIndex),
+          series: series,
+          seriesIndex: seriesIndex,
+          chartRect: chartRect,
+          group: seriesElement,
+          element: bar
+        }, positions));
+      }.bind(this));
+    }.bind(this));
+
+    this.eventEmitter.emit('created', {
+      bounds: valueAxis.bounds,
+      chartRect: chartRect,
+      axisX: axisX,
+      axisY: axisY,
+      svg: this.svg,
+      options: options
+    });
+  }
+
+  /**
+   * This method creates a new bar chart and returns API object that you can use for later changes.
+   *
+   * @memberof Chartist.Bar
+   * @param {String|Node} query A selector query string or directly a DOM element
+   * @param {Object} data The data object that needs to consist of a labels and a series array
+   * @param {Object} [options] The options object with options that override the default options. Check the examples for a detailed list.
+   * @param {Array} [responsiveOptions] Specify an array of responsive option arrays which are a media query and options object pair => [[mediaQueryString, optionsObject],[more...]]
+   * @return {Object} An object which exposes the API for the created chart
+   *
+   * @example
+   * // Create a simple bar chart
+   * var data = {
+   *   labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+   *   series: [
+   *     [5, 2, 4, 2, 0]
+   *   ]
+   * };
+   *
+   * // In the global name space Chartist we call the Bar function to initialize a bar chart. As a first parameter we pass in a selector where we would like to get our chart created and as a second parameter we pass our data object.
+   * new Chartist.Bar('.ct-chart', data);
+   *
+   * @example
+   * // This example creates a bipolar grouped bar chart where the boundaries are limitted to -10 and 10
+   * new Chartist.Bar('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5, 6, 7],
+   *   series: [
+   *     [1, 3, 2, -5, -3, 1, -6],
+   *     [-5, -2, -4, -1, 2, -3, 1]
+   *   ]
+   * }, {
+   *   seriesBarDistance: 12,
+   *   low: -10,
+   *   high: 10
+   * });
+   *
+   */
+  function Bar(query, data, options, responsiveOptions) {
+    Chartist.Bar.super.constructor.call(this,
+      query,
+      data,
+      defaultOptions,
+      Chartist.extend({}, defaultOptions, options),
+      responsiveOptions);
+  }
+
+  // Creating bar chart type in Chartist namespace
+  Chartist.Bar = Chartist.Base.extend({
+    constructor: Bar,
+    createChart: createChart
+  });
+
+}(window, document, Chartist));
+;/**
+ * The pie chart module of Chartist that can be used to draw pie, donut or gauge charts
+ *
+ * @module Chartist.Pie
+ */
+/* global Chartist */
+(function(window, document, Chartist) {
+  'use strict';
+
+  /**
+   * Default options in line charts. Expand the code view to see a detailed list of options with comments.
+   *
+   * @memberof Chartist.Pie
+   */
+  var defaultOptions = {
+    // Specify a fixed width for the chart as a string (i.e. '100px' or '50%')
+    width: undefined,
+    // Specify a fixed height for the chart as a string (i.e. '100px' or '50%')
+    height: undefined,
+    // Padding of the chart drawing area to the container element and labels as a number or padding object {top: 5, right: 5, bottom: 5, left: 5}
+    chartPadding: 5,
+    // Override the class names that are used to generate the SVG structure of the chart
+    classNames: {
+      chartPie: 'ct-chart-pie',
+      chartDonut: 'ct-chart-donut',
+      series: 'ct-series',
+      slicePie: 'ct-slice-pie',
+      sliceDonut: 'ct-slice-donut',
+      label: 'ct-label'
+    },
+    // The start angle of the pie chart in degrees where 0 points north. A higher value offsets the start angle clockwise.
+    startAngle: 0,
+    // An optional total you can specify. By specifying a total value, the sum of the values in the series must be this total in order to draw a full pie. You can use this parameter to draw only parts of a pie or gauge charts.
+    total: undefined,
+    // If specified the donut CSS classes will be used and strokes will be drawn instead of pie slices.
+    donut: false,
+    // Specify the donut stroke width, currently done in javascript for convenience. May move to CSS styles in the future.
+    donutWidth: 60,
+    // If a label should be shown or not
+    showLabel: true,
+    // Label position offset from the standard position which is half distance of the radius. This value can be either positive or negative. Positive values will position the label away from the center.
+    labelOffset: 0,
+    // This option can be set to 'inside', 'outside' or 'center'. Positioned with 'inside' the labels will be placed on half the distance of the radius to the border of the Pie by respecting the 'labelOffset'. The 'outside' option will place the labels at the border of the pie and 'center' will place the labels in the absolute center point of the chart. The 'center' option only makes sense in conjunction with the 'labelOffset' option.
+    labelPosition: 'inside',
+    // An interpolation function for the label value
+    labelInterpolationFnc: Chartist.noop,
+    // Label direction can be 'neutral', 'explode' or 'implode'. The labels anchor will be positioned based on those settings as well as the fact if the labels are on the right or left side of the center of the chart. Usually explode is useful when labels are positioned far away from the center.
+    labelDirection: 'neutral',
+    // If true the whole data is reversed including labels, the series order as well as the whole series data arrays.
+    reverseData: false
+  };
+
+  /**
+   * Determines SVG anchor position based on direction and center parameter
+   *
+   * @param center
+   * @param label
+   * @param direction
+   * @return {string}
+   */
+  function determineAnchorPosition(center, label, direction) {
+    var toTheRight = label.x > center.x;
+
+    if(toTheRight && direction === 'explode' ||
+      !toTheRight && direction === 'implode') {
+      return 'start';
+    } else if(toTheRight && direction === 'implode' ||
+      !toTheRight && direction === 'explode') {
+      return 'end';
+    } else {
+      return 'middle';
+    }
+  }
+
+  /**
+   * Creates the pie chart
+   *
+   * @param options
+   */
+  function createChart(options) {
+    var seriesGroups = [],
+      chartRect,
+      radius,
+      labelRadius,
+      totalDataSum,
+      startAngle = options.startAngle,
+      dataArray = Chartist.getDataArray(this.data, options.reverseData);
+
+    // Create SVG.js draw
+    this.svg = Chartist.createSvg(this.container, options.width, options.height,options.donut ? options.classNames.chartDonut : options.classNames.chartPie);
+    // Calculate charting rect
+    chartRect = Chartist.createChartRect(this.svg, options, defaultOptions.padding);
+    // Get biggest circle radius possible within chartRect
+    radius = Math.min(chartRect.width() / 2, chartRect.height() / 2);
+    // Calculate total of all series to get reference value or use total reference from optional options
+    totalDataSum = options.total || dataArray.reduce(function(previousValue, currentValue) {
+      return previousValue + currentValue;
+    }, 0);
+
+    // If this is a donut chart we need to adjust our radius to enable strokes to be drawn inside
+    // Unfortunately this is not possible with the current SVG Spec
+    // See this proposal for more details: http://lists.w3.org/Archives/Public/www-svg/2003Oct/0000.html
+    radius -= options.donut ? options.donutWidth / 2  : 0;
+
+    // If labelPosition is set to `outside` or a donut chart is drawn then the label position is at the radius,
+    // if regular pie chart it's half of the radius
+    if(options.labelPosition === 'outside' || options.donut) {
+      labelRadius = radius;
+    } else if(options.labelPosition === 'center') {
+      // If labelPosition is center we start with 0 and will later wait for the labelOffset
+      labelRadius = 0;
+    } else {
+      // Default option is 'inside' where we use half the radius so the label will be placed in the center of the pie
+      // slice
+      labelRadius = radius / 2;
+    }
+    // Add the offset to the labelRadius where a negative offset means closed to the center of the chart
+    labelRadius += options.labelOffset;
+
+    // Calculate end angle based on total sum and current data value and offset with padding
+    var center = {
+      x: chartRect.x1 + chartRect.width() / 2,
+      y: chartRect.y2 + chartRect.height() / 2
+    };
+
+    // Check if there is only one non-zero value in the series array.
+    var hasSingleValInSeries = this.data.series.filter(function(val) {
+      return val.hasOwnProperty('value') ? val.value !== 0 : val !== 0;
+    }).length === 1;
+
+    // Draw the series
+    // initialize series groups
+    for (var i = 0; i < this.data.series.length; i++) {
+      var series = this.data.series[i];
+      seriesGroups[i] = this.svg.elem('g', null, null, true);
+
+      // If the series is an object and contains a name or meta data we add a custom attribute
+      seriesGroups[i].attr({
+        'series-name': series.name
+      }, Chartist.xmlNs.uri);
+
+      // Use series class from series data or if not set generate one
+      seriesGroups[i].addClass([
+        options.classNames.series,
+        (series.className || options.classNames.series + '-' + Chartist.alphaNumerate(i))
+      ].join(' '));
+
+      var endAngle = startAngle + dataArray[i] / totalDataSum * 360;
+      // If we need to draw the arc for all 360 degrees we need to add a hack where we close the circle
+      // with Z and use 359.99 degrees
+      if(endAngle - startAngle === 360) {
+        endAngle -= 0.01;
+      }
+
+      var start = Chartist.polarToCartesian(center.x, center.y, radius, startAngle - (i === 0 || hasSingleValInSeries ? 0 : 0.2)),
+        end = Chartist.polarToCartesian(center.x, center.y, radius, endAngle);
+
+      // Create a new path element for the pie chart. If this isn't a donut chart we should close the path for a correct stroke
+      var path = new Chartist.Svg.Path(!options.donut)
+        .move(end.x, end.y)
+        .arc(radius, radius, 0, endAngle - startAngle > 180, 0, start.x, start.y);
+
+      // If regular pie chart (no donut) we add a line to the center of the circle for completing the pie
+      if(!options.donut) {
+        path.line(center.x, center.y);
+      }
+
+      // Create the SVG path
+      // If this is a donut chart we add the donut class, otherwise just a regular slice
+      var pathElement = seriesGroups[i].elem('path', {
+        d: path.stringify()
+      }, options.donut ? options.classNames.sliceDonut : options.classNames.slicePie);
+
+      // Adding the pie series value to the path
+      pathElement.attr({
+        'value': dataArray[i],
+        'meta': Chartist.serialize(series.meta)
+      }, Chartist.xmlNs.uri);
+
+      // If this is a donut, we add the stroke-width as style attribute
+      if(options.donut) {
+        pathElement.attr({
+          'style': 'stroke-width: ' + (+options.donutWidth) + 'px'
+        });
+      }
+
+      // Fire off draw event
+      this.eventEmitter.emit('draw', {
+        type: 'slice',
+        value: dataArray[i],
+        totalDataSum: totalDataSum,
+        index: i,
+        meta: series.meta,
+        series: series,
+        group: seriesGroups[i],
+        element: pathElement,
+        path: path.clone(),
+        center: center,
+        radius: radius,
+        startAngle: startAngle,
+        endAngle: endAngle
+      });
+
+      // If we need to show labels we need to add the label for this slice now
+      if(options.showLabel) {
+        // Position at the labelRadius distance from center and between start and end angle
+        var labelPosition = Chartist.polarToCartesian(center.x, center.y, labelRadius, startAngle + (endAngle - startAngle) / 2),
+          interpolatedValue = options.labelInterpolationFnc(this.data.labels ? this.data.labels[i] : dataArray[i], i);
+
+        if(interpolatedValue || interpolatedValue === 0) {
+          var labelElement = seriesGroups[i].elem('text', {
+            dx: labelPosition.x,
+            dy: labelPosition.y,
+            'text-anchor': determineAnchorPosition(center, labelPosition, options.labelDirection)
+          }, options.classNames.label).text('' + interpolatedValue);
+
+          // Fire off draw event
+          this.eventEmitter.emit('draw', {
+            type: 'label',
+            index: i,
+            group: seriesGroups[i],
+            element: labelElement,
+            text: '' + interpolatedValue,
+            x: labelPosition.x,
+            y: labelPosition.y
+          });
+        }
+      }
+
+      // Set next startAngle to current endAngle. Use slight offset so there are no transparent hairline issues
+      // (except for last slice)
+      startAngle = endAngle;
+    }
+
+    this.eventEmitter.emit('created', {
+      chartRect: chartRect,
+      svg: this.svg,
+      options: options
+    });
+  }
+
+  /**
+   * This method creates a new pie chart and returns an object that can be used to redraw the chart.
+   *
+   * @memberof Chartist.Pie
+   * @param {String|Node} query A selector query string or directly a DOM element
+   * @param {Object} data The data object in the pie chart needs to have a series property with a one dimensional data array. The values will be normalized against each other and don't necessarily need to be in percentage. The series property can also be an array of value objects that contain a value property and a className property to override the CSS class name for the series group.
+   * @param {Object} [options] The options object with options that override the default options. Check the examples for a detailed list.
+   * @param {Array} [responsiveOptions] Specify an array of responsive option arrays which are a media query and options object pair => [[mediaQueryString, optionsObject],[more...]]
+   * @return {Object} An object with a version and an update method to manually redraw the chart
+   *
+   * @example
+   * // Simple pie chart example with four series
+   * new Chartist.Pie('.ct-chart', {
+   *   series: [10, 2, 4, 3]
+   * });
+   *
+   * @example
+   * // Drawing a donut chart
+   * new Chartist.Pie('.ct-chart', {
+   *   series: [10, 2, 4, 3]
+   * }, {
+   *   donut: true
+   * });
+   *
+   * @example
+   * // Using donut, startAngle and total to draw a gauge chart
+   * new Chartist.Pie('.ct-chart', {
+   *   series: [20, 10, 30, 40]
+   * }, {
+   *   donut: true,
+   *   donutWidth: 20,
+   *   startAngle: 270,
+   *   total: 200
+   * });
+   *
+   * @example
+   * // Drawing a pie chart with padding and labels that are outside the pie
+   * new Chartist.Pie('.ct-chart', {
+   *   series: [20, 10, 30, 40]
+   * }, {
+   *   chartPadding: 30,
+   *   labelOffset: 50,
+   *   labelDirection: 'explode'
+   * });
+   *
+   * @example
+   * // Overriding the class names for individual series as well as a name and meta data.
+   * // The name will be written as ct:series-name attribute and the meta data will be serialized and written
+   * // to a ct:meta attribute.
+   * new Chartist.Pie('.ct-chart', {
+   *   series: [{
+   *     value: 20,
+   *     name: 'Series 1',
+   *     className: 'my-custom-class-one',
+   *     meta: 'Meta One'
+   *   }, {
+   *     value: 10,
+   *     name: 'Series 2',
+   *     className: 'my-custom-class-two',
+   *     meta: 'Meta Two'
+   *   }, {
+   *     value: 70,
+   *     name: 'Series 3',
+   *     className: 'my-custom-class-three',
+   *     meta: 'Meta Three'
+   *   }]
+   * });
+   */
+  function Pie(query, data, options, responsiveOptions) {
+    Chartist.Pie.super.constructor.call(this,
+      query,
+      data,
+      defaultOptions,
+      Chartist.extend({}, defaultOptions, options),
+      responsiveOptions);
+  }
+
+  // Creating pie chart type in Chartist namespace
+  Chartist.Pie = Chartist.Base.extend({
+    constructor: Pie,
+    createChart: createChart,
+    determineAnchorPosition: determineAnchorPosition
+  });
+
+}(window, document, Chartist));
+
+return Chartist;
+
+}));
+
+},{}],9:[function(require,module,exports){
 (function (global){
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var t;"undefined"!=typeof window?t=window:"undefined"!=typeof global?t=global:"undefined"!=typeof self&&(t=self),t.horsey=e()}}(function(){return function e(t,n,r){function o(a,u){if(!n[a]){if(!t[a]){var f="function"==typeof require&&require;if(!u&&f)return f(a,!0);if(i)return i(a,!0);var c=new Error("Cannot find module '"+a+"'");throw c.code="MODULE_NOT_FOUND",c}var s=n[a]={exports:{}};t[a][0].call(s.exports,function(e){var n=t[a][1][e];return o(n?n:e)},s,s.exports,e,t,n,r)}return n[a].exports}for(var i="function"==typeof require&&require,a=0;a<r.length;a++)o(r[a]);return o}({1:[function(e,t){(function(n){"use strict";function r(e){var t,n;for(n=0;n<y.length;n++)if(t=y[n],t.el===e)return t.api;return null}function o(e,t){function n(e){W(!0),ut=ft.attachment=e,G="INPUT"===ut.tagName||"TEXTAREA"===ut.tagName,W()}function o(){F&&F.refresh()}function s(){l.remove(ut,"focus",it),tt(x)}function x(e){e.forEach(T),ft.suggestions=e}function C(){for(;rt.lastChild;)rt.removeChild(rt.lastChild)}function T(t){function n(){$(Q(t)),L(),ut.focus(),l.fabricate(ut,"horsey-selected")}function r(){var n=G?e.value:e.innerHTML;nt(n,t)?o.className=o.className.replace(/ sey-hide/g,""):N(o)||(o.className+=" sey-hide",ot===o&&O())}var o=u("li","sey-item");return J(o,t),l.add(o,"click",n),l.add(o,"horsey-filter",r),rt.appendChild(o),ft.suggestions.push(t),o}function E(){return-1!==rt.className.indexOf("sey-show")}function N(e){return-1!==e.className.indexOf("sey-hide")}function S(){E()||(rt.className+=" sey-show",F.refresh(),l.fabricate(ut,"horsey-show"))}function k(e){O(),e&&(ot=e,ot.className+=" sey-selected")}function O(){ot&&(ot.className=ot.className.replace(/ sey-selected/g,""),ot=null)}function I(e,t){var n=rt.children.length;if(t>n)return void O();if(0!==n){var r=e?"lastChild":"firstChild",o=e?"previousSibling":"nextSibling",i=ot&&ot[o]||rt[r];k(i),N(i)&&I(e,t?t+1:1)}}function L(){F.sleep(),rt.className=rt.className.replace(/ sey-show/g,""),O(),l.fabricate(ut,"horsey-hide")}function A(e){var t=E(),n=e.which||e.keyCode;n===m?(Y.autoShowOnUpDown&&S(),t&&(I(),H(e))):n===g?(Y.autoShowOnUpDown&&S(),t&&(I(!0),H(e))):t&&(n===v?(ot?l.fabricate(ot,"click"):L(),H(e)):n===h&&(L(),H(e)))}function H(e){e.stopPropagation(),e.preventDefault()}function R(){if(E()){l.fabricate(ut,"horsey-filter");for(var e=rt.firstChild;e;)l.fabricate(e,"horsey-filter"),e=e.nextSibling;ot||I(),ot||L()}}function U(e){var t=e.which||e.keyCode;t!==v&&at()}function D(e){var t=e.which||e.keyCode;t!==v&&setTimeout(S,0)}function P(e){var t=e.target;if(t===ut)return!0;for(;t;){if(t===rt)return!0;t=t.parentNode}}function z(e){P(e)||L()}function B(e){P(e)||L()}function W(e){var t=e?"remove":"add";F&&(F.destroy(),F=null),e||(F=d(rt,ut,{caret:"INPUT"!==ut.tagName,getSelection:Z}),E()||F.sleep()),"function"!=typeof tt||it.used||(e||w.activeElement!==ut?l[t](ut,"focus",it):it()),l[t](ut,"keypress",D),l[t](ut,"keypress",at),l[t](ut,"paste",at),l[t](ut,"keydown",U),l[t](ut,"keydown",A),Y.autoHideOnBlur&&l[t](w.documentElement,"focus",z,!0),Y.autoHideOnClick&&l[t](w,"click",B),et&&l[t](et,"submit",L)}function M(){W(!0),_.contains(rt)&&_.removeChild(rt),y.splice(y.indexOf(ct),1)}function X(t){G?e.value=t:e.innerHTML=t}function j(e,t){e.innerText=e.textContent=K(t)}function q(e,t){var n=K(t)||"",r=Q(t)||"";return p(e,n.toLowerCase())||p(e,r.toLowerCase())}var V=r(e);if(V)return V;var F,G,Y=t||{},_=Y.appendTo||w.body,J=Y.render||j,K=Y.getText||a,Q=Y.getValue||i,Z=Y.getSelection||b.getSelection,$=Y.set||X,et=Y.form,tt=Y.suggestions,nt=Y.filter||q,rt=u("ul","sey-list"),ot=null,it=f(s),at=c(R),ut=e;void 0===Y.autoHideOnBlur&&(Y.autoHideOnBlur=!0),void 0===Y.autoHideOnClick&&(Y.autoHideOnClick=!0),void 0===Y.autoShowOnUpDown&&(Y.autoShowOnUpDown="INPUT"===e.tagName);var ft={add:T,clear:C,show:S,hide:L,destroy:M,refreshPosition:o,defaultRenderer:j,defaultGetText:a,defaultGetValue:i,defaultSetter:X,defaultFilter:q,retarget:n,attachment:ut,list:rt,suggestions:[]},ct={el:e,api:ft};return n(e),y.push(ct),_.appendChild(rt),e.setAttribute("autocomplete","off"),Array.isArray(tt)&&x(tt),ft}function i(e){return"string"==typeof e?e:e.value}function a(e){return"string"==typeof e?e:e.text}function u(e,t){var n=w.createElement(e);return n.className=t,n}function f(e){function t(){n||(t.used=n=!0,(e||s).apply(null,arguments))}var n;return t}function c(e){return function(){setTimeout(e,0)}}function s(){}var l=e("crossvent"),d=e("bullseye"),p=e("fuzzysearch"),v=13,h=27,g=38,m=40,y=[],w=document,b=n;o.find=r,t.exports=o}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{bullseye:2,crossvent:6,fuzzysearch:7}],2:[function(e,t){"use strict";function n(e,t,n){function a(){g.sleeping=!0}function u(){return f()}function f(e){var n=t.getBoundingClientRect(),r=document.body.scrollTop||document.documentElement.scrollTop;return m?(e=m.read(),{x:(e.absolute?0:n.left)+e.x,y:(e.absolute?0:n.top)+r+e.y+20}):{x:n.left,y:n.top+r}}function c(e){s(e)}function s(n){if(v)throw new Error("Bullseye can't refresh after being destroyed. Create another instance instead.");if(m&&!n)return g.sleeping=!1,void m.refresh();var r=f(n);m||t===e||(r.y+=t.offsetHeight),e.style.left=r.x+"px",e.style.top=r.y+"px"}function l(){m&&m.destroy(),r.remove(window,"resize",h),v=!0}var d=n,p=t&&t.tagName;p===!1&&2===arguments.length&&(d=t),p===!1&&(t=e),d||(d={});var v=!1,h=o(s,30),g={update:d.autoupdateToCaret!==!1&&c},m=d.caret&&i(t,g);return s(),d.tracking!==!1&&r.add(window,"resize",h),{read:u,refresh:s,destroy:l,sleep:a}}var r=e("crossvent"),o=e("./throttle"),i=e("./tailormade");t.exports=n},{"./tailormade":4,"./throttle":5,crossvent:6}],3:[function(e,t){"use strict";function n(e){return{start:e.selectionStart,end:e.selectionEnd}}function r(e){function t(t,r){return n!==e&&(n?n.focus():e.blur()),{start:t,end:r}}var n=document.activeElement;n!==e&&e.focus();var r=document.selection.createRange(),a=r.getBookmark(),u=e.value,f=o(u),c=r.parentElement();if(null===c||!i(c))return t(0,0);r.text=f+r.text+f;var s=e.value;return e.value=u,r.moveToBookmark(a),r.select(),t(s.indexOf(f),s.lastIndexOf(f)-f.length)}function o(e){var t;do t="@@marker."+Math.random()*new Date;while(-1!==e.indexOf(t));return t}function i(e){return"INPUT"===e.tagName&&"text"===e.type||"TEXTAREA"===e.tagName}function a(e,t){e.selectionStart=f(e,t.start),e.selectionEnd=f(e,t.end)}function u(e,t){var n=e.createTextRange();"end"===t.start&&"end"===t.end?(n.collapse(!1),n.select()):(n.collapse(!0),n.moveEnd("character",f(e,t.end)),n.moveStart("character",f(e,t.start)),n.select())}function f(e,t){return"end"===t?e.value.length:t||0}function c(e,t){return 2===arguments.length&&l(e,t),s(e)}var s=n,l=a;document.selection&&document.selection.createRange&&(s=r,l=u),t.exports=c},{}],4:[function(e,t){(function(n){"use strict";function r(e,t){function n(){}function r(){return(b?d:p)()}function l(){return C.sleeping?void 0:(C.update||n)(r())}function d(){var t=o(e),n=g(),r=v(n,t.start);return c.body.removeChild(n.mirror),r}function p(){var e=(C.getSelection||f.getSelection)();if(e.rangeCount){var t=e.getRangeAt(0),n="P"===t.startContainer.nodeName&&0===t.startOffset;if(n)return{x:t.startContainer.offsetLeft,y:t.startContainer.offsetTop,absolute:!0};if(t.getClientRects){var r=t.getClientRects();if(r.length>0)return{x:r[0].left,y:r[0].top,absolute:!0}}}return{x:0,y:0}}function v(t,n){var r=c.createElement("span"),o=t.mirror,i=t.computed;return m(o,h(e).substring(0,n)),"INPUT"===e.tagName&&(o.textContent=o.textContent.replace(/\s/g," ")),m(r,h(e).substring(n)||"."),o.appendChild(r),{x:r.offsetLeft+parseInt(i.borderLeftWidth),y:r.offsetTop+parseInt(i.borderTopWidth)}}function h(e){return b?e.value:e.innerHTML}function g(){function t(e){o[e]=n[e]}var n=f.getComputedStyle?getComputedStyle(e):e.currentStyle,r=c.createElement("div"),o=r.style;return c.body.appendChild(r),"INPUT"!==e.tagName&&(o.wordWrap="break-word"),o.whiteSpace="pre-wrap",o.position="absolute",o.visibility="hidden",u.forEach(t),s?(o.width=parseInt(n.width)-2+"px",e.scrollHeight>parseInt(n.height)&&(o.overflowY="scroll")):o.overflow="hidden",{mirror:r,computed:n}}function m(e,t){b?e.textContent=t:e.innerHTML=t}function y(t){var n=t?"remove":"add";i[n](e,"keydown",x),i[n](e,"keyup",x),i[n](e,"input",x),i[n](e,"paste",x),i[n](e,"change",x)}function w(){y(!0)}var b="INPUT"===e.tagName||"TEXTAREA"===e.tagName,x=a(l,30),C=t||{};return y(),{read:r,refresh:x,destroy:w}}var o=e("sell"),i=e("crossvent"),a=e("./throttle"),u=["direction","boxSizing","width","height","overflowX","overflowY","borderTopWidth","borderRightWidth","borderBottomWidth","borderLeftWidth","paddingTop","paddingRight","paddingBottom","paddingLeft","fontStyle","fontVariant","fontWeight","fontStretch","fontSize","fontSizeAdjust","lineHeight","fontFamily","textAlign","textTransform","textIndent","textDecoration","letterSpacing","wordSpacing"],f=n,c=document,s=null!==f.mozInnerScreenX&&void 0!==f.mozInnerScreenX;t.exports=r}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{"./throttle":5,crossvent:6,sell:3}],5:[function(e,t){"use strict";function n(e,t){var n,r=-1/0;return function(){function o(){clearTimeout(n),n=null;var i=r+t,a=Date.now();a>i?(r=a,e()):n=setTimeout(o,i-a)}n||o()}}t.exports=n},{}],6:[function(e,t){(function(e){"use strict";function n(e,t,n,r){return e.addEventListener(t,n,r)}function r(e,t,n){return e.attachEvent("on"+t,f(e,t,n))}function o(e,t,n,r){return e.removeEventListener(t,n,r)}function i(e,t,n){return e.detachEvent("on"+t,c(e,t,n))}function a(e,t){var n;l.createEvent?(n=l.createEvent("Event"),n.initEvent(t,!0,!0),e.dispatchEvent(n)):l.createEventObject&&(n=l.createEventObject(),e.fireEvent("on"+t,n))}function u(t,n,r){return function(n){var o=n||e.event;o.target=o.target||o.srcElement,o.preventDefault=o.preventDefault||function(){o.returnValue=!1},o.stopPropagation=o.stopPropagation||function(){o.cancelBubble=!0},r.call(t,o)}}function f(e,t,n){var r=c(e,t,n)||u(e,t,n);return v.push({wrapper:r,element:e,type:t,fn:n}),r}function c(e,t,n){var r=s(e,t,n);if(r){var o=v[r].wrapper;return v.splice(r,1),o}}function s(e,t,n){var r,o;for(r=0;r<v.length;r++)if(o=v[r],o.element===e&&o.type===t&&o.fn===n)return r}var l=document,d=n,p=o,v=[];e.addEventListener||(d=r,p=i),t.exports={add:d,remove:p,fabricate:a}}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],7:[function(e,t){"use strict";function n(e,t){var n=t.length,r=e.length;if(r>n)return!1;if(r===n)return e===t;e:for(var o=0,i=0;r>o;o++){for(var a=e.charCodeAt(o);n>i;)if(t.charCodeAt(i++)===a)continue e;return!1}return!0}t.exports=n},{}]},{},[1])(1)});
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var t;"undefined"!=typeof window?t=window:"undefined"!=typeof global?t=global:"undefined"!=typeof self&&(t=self),t.insignia=e()}}(function(){return function e(t,n,r){function i(a,s){if(!n[a]){if(!t[a]){var u="function"==typeof require&&require;if(!s&&u)return u(a,!0);if(o)return o(a,!0);var l=new Error("Cannot find module '"+a+"'");throw l.code="MODULE_NOT_FOUND",l}var f=n[a]={exports:{}};t[a][0].call(f.exports,function(e){var n=t[a][1][e];return i(n?n:e)},f,f.exports,e,t,n,r)}return n[a].exports}for(var o="function"==typeof require&&require,a=0;a<r.length;a++)i(r[a]);return i}({1:[function(e,t){"use strict";var n=e("crossvent"),r=e("./dom"),i=e("./text"),o=["fontFamily","fontSize","fontWeight","fontStyle","letterSpacing","textTransform","wordSpacing","textIndent","webkitBoxSizing","mozBoxSizing","boxSizing","padding","border"],a=20;t.exports=function(e){function t(){var e,t,n=f();for(t=0;t<o.length;t++)e=n[o[t]],void 0!==e&&null!==e&&(c.style[o[t]]=e);c.disabled="disabled",c.style.whiteSpace="pre",c.style.position="absolute",c.style.top=c.style.left="-9999em"}function s(){var t=e.value;if(t!==c.value){i(c,t);var n=c.offsetWidth+a;e.style.width=n+"px"}}function u(t){var r=t?"remove":"add";n[r](e,"keydown",s),n[r](e,"keyup",s),n[r](e,"input",s),n[r](e,"paste",s),n[r](e,"change",s)}function l(){u(!0),c.parentElement.removeChild(c),e.style.width=""}function f(){return window.getComputedStyle?window.getComputedStyle(e):e.currentStyle}var c=r("span");return document.body.appendChild(c),t(),u(),{remap:t,refresh:s,destroy:l}}},{"./dom":2,"./text":9,crossvent:4}],2:[function(e,t){"use strict";t.exports=function(e,t){var n=document.createElement(e);return t&&(n.className=t),n}},{}],3:[function(e,t){"use strict";function n(e){var t,n;for(n=0;n<w.length;n++)if(t=w[n],t.el===e)return t.api;return null}function r(e,t){function r(t){var n=t?"remove":"add";i[n](e,"keydown",z),i[n](e,"keypress",D),i[n](e,"paste",A),i[n](rt,"click",k),i[n](document.documentElement,"focus",O,!0)}function S(){return r(!0),e.value=$(),e.className=e.className.replace(E,""),rt.className=rt.className.replace(x,""),tt.parentElement.removeChild(tt),nt.parentElement.removeChild(nt),w.splice(w.indexOf(at),1),it.destroy(),ot.destroyed=!0,ot.destroy=N(ot),ot.tags=ot.value=N(null),ot}function N(e){return function(){return e}}function O(t){t.target!==e&&(H=!0,B(!0),H=!1)}function k(t){var n=t.target;if(y.test(n.className))return R(n.parentElement,{start:"end",end:"end",remove:!0}),void T();for(var r=n,i=h.test(r.className);i===!1&&r.parentElement;)r=r.parentElement,i=h.test(r.className);i?R(r,C):n!==e&&(T(),e.focus())}function T(){R(nt.lastChild,C),j([K],!0)}function B(t){return j([K],t),t&&U(nt,F),i.fabricate(e,"insignia-converted"),ot}function F(e,t){tt.appendChild(t)}function z(t){var n=l(e),r=t.which||t.keyCode||t.charCode;if(r===v)tt.firstChild?R(tt.firstChild,{}):l(e,{start:0,end:0});else if(r===p)nt.lastChild?R(nt.lastChild,C):l(e,C);else if(r===g&&0===n.start&&tt.lastChild)R(tt.lastChild,C);else if(r!==d||0!==n.start||0!==n.end&&n.end===e.value.length||!tt.lastChild){if(r!==m||n.end!==e.value.length||!nt.firstChild)return;R(nt.firstChild,{})}else R(tt.lastChild,C);return t.preventDefault(),!1}function D(e){var t=e.which||e.keyCode||e.charCode;return String.fromCharCode(t)===K?(B(),e.preventDefault(),!1):void 0}function A(){setTimeout(function(){j()},0)}function j(t,n){var r=l(e),o=n?1/0:r.start,a=e.value.slice(0,o).concat(t||[]).split(K);if(!(a.length<1)){var s,u=a.pop()+e.value.slice(o),f=a.join(K).length;for(s=0;s<a.length;s++)M(tt,a[s]);L(),e.value=u,r.start-=f,r.end-=f,H!==!0&&l(e,r),it.refresh(),i.fabricate(e,"insignia-evaluated")}}function L(){function e(e,n){Y(e,s(t))?t.push(e):n.parentElement.removeChild(n)}var t=[];U(tt,e),U(nt,e)}function q(e,t){a(e,t)}function I(e){return a(e)}function M(e,t){var n=t.trim();if(0!==n.length){var r=o("span","nsg-tag");J.deletion&&r.appendChild(o("span","nsg-tag-remove")),Z(r,X(n)),e.appendChild(r)}}function R(t,n){if(t){j([K],!0);var r=t.parentElement;if(r===tt)for(;r.lastChild!==t;)nt.insertBefore(r.lastChild,nt.firstChild);else for(;r.firstChild!==t;)tt.appendChild(r.firstChild);t.parentElement.removeChild(t),e.value=n.remove?"":et(t),e.focus(),l(e,n),it.refresh()}}function P(){var t,n=e.parentElement.children;for(t=0;t<n.length;t++)if(n[t]!==e&&n[t].nodeType===c)return!0;return!1}function U(e,t){var n,r,i=s(e.children);for(n=0;n<i.length;n++)r=i[n],t(et(r),r,n)}function W(){function t(e){if(e){var t=X(e);Y(t,s(r))&&r.push(t)}}var n,r=[],i=e.value.split(K);for(U(tt,t),n=0;n<i.length;n++)t(i[n]);return U(nt,t),r}function $(){return W().join(K)}function _(e){return e.trim().toLowerCase()}function V(e,t){return-1===t.indexOf(e)}var G=n(e);if(G)return G;var H=document.activeElement!==e,J=t||{},K=J.delimiter||b;if(1!==K.length)throw new Error("Insignia expected a single-character delimiter string");var Q=P(e);if(Q||!f.test(e.tagName))throw new Error("Insignia expected an input element without any siblings");var X=J.parse||_,Y=J.validate||V,Z=J.render||q,et=J.readTag||I,tt=o("span","nsg-tags nsg-tags-before"),nt=o("span","nsg-tags nsg-tags-after"),rt=e.parentElement;e.className+=" nsg-input",rt.className+=" nsg-editor",rt.insertBefore(tt,e),rt.insertBefore(nt,e.nextSibling),r();var it=u(e),ot={tags:W,value:$,convert:B,destroy:S},at={el:e,api:ot};return j([K],!0),w.push(at),H=!1,ot}e("./polyfills/String.prototype.trim"),e("./polyfills/Array.prototype.indexOf");var i=e("crossvent"),o=e("./dom"),a=e("./text"),s=e("./slice"),u=e("./autosize"),l=e("./selection"),f=/^input$/i,c=1,d=8,p=35,v=36,g=37,m=39,h=/\bnsg-tag\b/,y=/\bnsg-tag-remove\b/,x=/\bnsg-editor\b/g,E=/\bnsg-input\b/g,C={start:"end",end:"end"},w=[],b=" ";r.find=n,t.exports=r},{"./autosize":1,"./dom":2,"./polyfills/Array.prototype.indexOf":5,"./polyfills/String.prototype.trim":6,"./selection":7,"./slice":8,"./text":9,crossvent:4}],4:[function(e,t){(function(e){"use strict";function n(e,t,n,r){return e.addEventListener(t,n,r)}function r(e,t,n){return e.attachEvent("on"+t,u(e,t,n))}function i(e,t,n,r){return e.removeEventListener(t,n,r)}function o(e,t,n){return e.detachEvent("on"+t,l(e,t,n))}function a(e,t){var n;c.createEvent?(n=c.createEvent("Event"),n.initEvent(t,!0,!0),e.dispatchEvent(n)):c.createEventObject&&(n=c.createEventObject(),e.fireEvent("on"+t,n))}function s(t,n,r){return function(n){var i=n||e.event;i.target=i.target||i.srcElement,i.preventDefault=i.preventDefault||function(){i.returnValue=!1},i.stopPropagation=i.stopPropagation||function(){i.cancelBubble=!0},r.call(t,i)}}function u(e,t,n){var r=l(e,t,n)||s(e,t,n);return v.push({wrapper:r,element:e,type:t,fn:n}),r}function l(e,t,n){var r=f(e,t,n);if(r){var i=v[r].wrapper;return v.splice(r,1),i}}function f(e,t,n){var r,i;for(r=0;r<v.length;r++)if(i=v[r],i.element===e&&i.type===t&&i.fn===n)return r}var c=document,d=n,p=i,v=[];e.addEventListener||(d=r,p=o),t.exports={add:d,remove:p,fabricate:a}}).call(this,"undefined"!=typeof global?global:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],5:[function(){"use strict";Array.prototype.indexOf||(Array.prototype.indexOf=function(e,t){if(void 0===this||null===this)throw new TypeError;var n=this.length;for(t=+t||0,1/0===Math.abs(t)?t=0:0>t&&(t+=n,0>t&&(t=0));n>t;t++)if(this[t]===e)return t;return-1})},{}],6:[function(){"use strict";if(!String.prototype.trim){var e=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;String.prototype.trim=function(){return this.replace(e,"")}}},{}],7:[function(e,t){"use strict";function n(e){return{start:e.selectionStart,end:e.selectionEnd}}function r(e){function t(t,r){return n!==e&&(n?n.focus():e.blur()),{start:t,end:r}}var n=document.activeElement;n!==e&&e.focus();var r=document.selection.createRange(),a=r.getBookmark(),s=e.value,u=i(s),l=r.parentElement();if(null===l||!o(l))return t(0,0);r.text=u+r.text+u;var f=e.value;return e.value=s,r.moveToBookmark(a),r.select(),t(f.indexOf(u),f.lastIndexOf(u)-u.length)}function i(e){var t;do t="@@marker."+Math.random()*new Date;while(-1!==e.indexOf(t));return t}function o(e){return d.test(e.tagName)&&"text"===e.type||p.test(e.tagName)}function a(e,t){e.selectionStart=u(e,t.start),e.selectionEnd=u(e,t.end)}function s(e,t){var n=e.createTextRange();"end"===t.start&&"end"===t.end?(n.collapse(!1),n.select()):(n.collapse(!0),n.moveEnd("character",t.end),n.moveStart("character",t.start),n.select())}function u(e,t){return"end"===t?e.value.length:t||0}function l(e,t){return 2===arguments.length&&c(e,t),f(e)}var f=n,c=a,d=/input/i,p=/textarea/i;document.selection&&document.selection.createRange&&(f=r,c=s),t.exports=l},{}],8:[function(e,t){"use strict";function n(e){var t,n=[];for(t=0;t<e.length;t++)n.push(e[t]);return n}t.exports=n},{}],9:[function(e,t){"use strict";function n(e,t){return 2===arguments.length&&(e.innerText=e.textContent=t),"string"==typeof e.innerText?e.innerText:e.textContent}t.exports=n},{}]},{},[3])(3)});
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.3
  * http://jquery.com/
@@ -37196,7 +41203,7 @@ return jQuery;
 
 }));
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -49366,7 +53373,7 @@ return jQuery;
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.2
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -52450,17 +56457,17 @@ return jQuery;
     return _moment;
 
 }));
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function (global){
 // rome@v2.1.16, MIT licensed. https://github.com/bevacqua/rome
 !function(t){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var e;"undefined"!=typeof window?e=window:"undefined"!=typeof global?e=global:"undefined"!=typeof self&&(e=self),e.rome=t()}}(function(){return function t(e,n,r){function o(i,s){if(!n[i]){if(!e[i]){var u="function"==typeof require&&require;if(!s&&u)return u(i,!0);if(a)return a(i,!0);throw new Error("Cannot find module '"+i+"'")}var c=n[i]={exports:{}};e[i][0].call(c.exports,function(t){var n=e[i][1][t];return o(n?n:t)},c,c.exports,t,e,n,r)}return n[i].exports}for(var a="function"==typeof require&&require,i=0;i<r.length;i++)o(r[i]);return o}({1:[function(t,e){function n(){}var r=e.exports={};r.nextTick=function(){var t="undefined"!=typeof window&&window.setImmediate,e="undefined"!=typeof window&&window.postMessage&&window.addEventListener;if(t)return function(t){return window.setImmediate(t)};if(e){var n=[];return window.addEventListener("message",function(t){var e=t.source;if((e===window||null===e)&&"process-tick"===t.data&&(t.stopPropagation(),n.length>0)){var r=n.shift();r()}},!0),function(t){n.push(t),window.postMessage("process-tick","*")}}return function(t){setTimeout(t,0)}}(),r.title="browser",r.browser=!0,r.env={},r.argv=[],r.on=n,r.addListener=n,r.once=n,r.off=n,r.removeListener=n,r.removeAllListeners=n,r.emit=n,r.binding=function(){throw new Error("process.binding is not supported")},r.cwd=function(){return"/"},r.chdir=function(){throw new Error("process.chdir is not supported")}},{}],2:[function(t,e){"use strict";function n(t,e,n){function i(){h.sleeping=!0}function s(){return u()}function u(t){var n=e.getBoundingClientRect(),r=document.body.scrollTop||document.documentElement.scrollTop;return v?(t=v.read(),{x:(t.absolute?0:n.left)+t.x,y:(t.absolute?0:n.top)+r+t.y+20}):{x:n.left,y:n.top+r}}function c(t){l(t)}function l(n){if(p)throw new Error("Bullseye can't refresh after being destroyed. Create another instance instead.");if(v&&!n)return h.sleeping=!1,v.refresh(),void 0;var r=u(n);v||e===t||(r.y+=e.offsetHeight),t.style.left=r.x+"px",t.style.top=r.y+"px"}function d(){v&&v.destroy(),r.remove(window,"resize",y),p=!0}var f=n,m=e&&e.tagName;m===!1&&2===arguments.length&&(f=e),m===!1&&(e=t),f||(f={});var p=!1,y=o(l,30),h={update:f.autoupdateToCaret!==!1&&c},v=f.caret&&a(e,h);return l(),f.tracking!==!1&&r.add(window,"resize",y),{read:s,refresh:l,destroy:d,sleep:i}}var r=t("crossvent"),o=t("./throttle"),a=t("./tailormade");e.exports=n},{"./tailormade":5,"./throttle":6,crossvent:3}],3:[function(t,e){(function(t){"use strict";function n(t,e,n,r){return t.addEventListener(e,n,r)}function r(t,e,n){return t.attachEvent("on"+e,u(t,e,n))}function o(t,e,n,r){return t.removeEventListener(e,n,r)}function a(t,e,n){return t.detachEvent("on"+e,c(t,e,n))}function i(t,e){var n;d.createEvent?(n=d.createEvent("Event"),n.initEvent(e,!0,!0),t.dispatchEvent(n)):d.createEventObject&&(n=d.createEventObject(),t.fireEvent("on"+e,n))}function s(e,n,r){return function(n){var o=n||t.event;o.target=o.target||o.srcElement,o.preventDefault=o.preventDefault||function(){o.returnValue=!1},o.stopPropagation=o.stopPropagation||function(){o.cancelBubble=!0},r.call(e,o)}}function u(t,e,n){var r=c(t,e,n)||s(t,e,n);return p.push({wrapper:r,element:t,type:e,fn:n}),r}function c(t,e,n){var r=l(t,e,n);if(r){var o=p[r].wrapper;return p.splice(r,1),o}}function l(t,e,n){var r,o;for(r=0;r<p.length;r++)if(o=p[r],o.element===t&&o.type===e&&o.fn===n)return r}var d=document,f=n,m=o,p=[];t.addEventListener||(f=r,m=a),e.exports={add:f,remove:m,fabricate:i}}).call(this,"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],4:[function(t,e){"use strict";function n(t){return{start:t.selectionStart,end:t.selectionEnd}}function r(t){function e(e,r){return n!==t&&(n?n.focus():t.blur()),{start:e,end:r}}var n=document.activeElement;n!==t&&t.focus();var r=document.selection.createRange(),i=r.getBookmark(),s=t.value,u=o(s),c=r.parentElement();if(null===c||!a(c))return e(0,0);r.text=u+r.text+u;var l=t.value;return t.value=s,r.moveToBookmark(i),r.select(),e(l.indexOf(u),l.lastIndexOf(u)-u.length)}function o(t){var e;do e="@@marker."+Math.random()*new Date;while(-1!==t.indexOf(e));return e}function a(t){return"INPUT"===t.tagName&&"text"===t.type||"TEXTAREA"===t.tagName}function i(t,e){t.selectionStart=u(t,e.start),t.selectionEnd=u(t,e.end)}function s(t,e){var n=t.createTextRange();"end"===e.start&&"end"===e.end?(n.collapse(!1),n.select()):(n.collapse(!0),n.moveEnd("character",u(t,e.end)),n.moveStart("character",u(t,e.start)),n.select())}function u(t,e){return"end"===e?t.value.length:e||0}function c(t,e){return 2===arguments.length&&d(t,e),l(t)}var l=n,d=i;document.selection&&document.selection.createRange&&(l=r,d=s),e.exports=c},{}],5:[function(t,e){(function(n){"use strict";function r(t,e){function n(){}function r(){return(b?f:m)()}function d(){return E.sleeping?void 0:(E.update||n)(r())}function f(){var e=o(t),n=h(),r=p(n,e.start);return c.body.removeChild(n.mirror),r}function m(){var t=(E.getSelection||u.getSelection)();if(t.rangeCount){var e=t.getRangeAt(0),n="P"===e.startContainer.nodeName&&0===e.startOffset;if(n)return{x:e.startContainer.offsetLeft,y:e.startContainer.offsetTop,absolute:!0};if(e.getClientRects){var r=e.getClientRects();if(r.length>0)return{x:r[0].left,y:r[0].top,absolute:!0}}}return{x:0,y:0}}function p(e,n){var r=c.createElement("span"),o=e.mirror,a=e.computed;return v(o,y(t).substring(0,n)),"INPUT"===t.tagName&&(o.textContent=o.textContent.replace(/\s/g," ")),v(r,y(t).substring(n)||"."),o.appendChild(r),{x:r.offsetLeft+parseInt(a.borderLeftWidth),y:r.offsetTop+parseInt(a.borderTopWidth)}}function y(t){return b?t.value:t.innerHTML}function h(){function e(t){o[t]=n[t]}var n=u.getComputedStyle?getComputedStyle(t):t.currentStyle,r=c.createElement("div"),o=r.style;return c.body.appendChild(r),"INPUT"!==t.tagName&&(o.wordWrap="break-word"),o.whiteSpace="pre-wrap",o.position="absolute",o.visibility="hidden",s.forEach(e),l?(o.width=parseInt(n.width)-2+"px",t.scrollHeight>parseInt(n.height)&&(o.overflowY="scroll")):o.overflow="hidden",{mirror:r,computed:n}}function v(t,e){b?t.textContent=e:t.innerHTML=e}function g(e){var n=e?"remove":"add";a[n](t,"keydown",x),a[n](t,"keyup",x),a[n](t,"input",x),a[n](t,"paste",x),a[n](t,"change",x)}function w(){g(!0)}var b="INPUT"===t.tagName||"TEXTAREA"===t.tagName,x=i(d,30),E=e||{};return g(),{read:r,refresh:x,destroy:w}}var o=t("sell"),a=t("crossvent"),i=t("./throttle"),s=["direction","boxSizing","width","height","overflowX","overflowY","borderTopWidth","borderRightWidth","borderBottomWidth","borderLeftWidth","paddingTop","paddingRight","paddingBottom","paddingLeft","fontStyle","fontVariant","fontWeight","fontStretch","fontSize","fontSizeAdjust","lineHeight","fontFamily","textAlign","textTransform","textIndent","textDecoration","letterSpacing","wordSpacing"],u=n,c=document,l=null!==u.mozInnerScreenX&&void 0!==u.mozInnerScreenX;e.exports=r}).call(this,"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{"./throttle":6,crossvent:3,sell:4}],6:[function(t,e){"use strict";function n(t,e){var n,r=-1/0;return function(){function o(){clearTimeout(n),n=null;var a=r+e,i=Date.now();i>a?(r=i,t()):n=setTimeout(o,a-i)}n||o()}}e.exports=n},{}],7:[function(t,e){e.exports=t("./src/contra.emitter.js")},{"./src/contra.emitter.js":8}],8:[function(t,e){(function(t){!function(n,r){"use strict";function o(t,e){return Array.prototype.slice.call(t,e)}function a(t,e,n){t&&s(function(){t.apply(n||null,e||[])})}function i(t,e){var n=e||{},i={};return t===r&&(t={}),t.on=function(e,n){return i[e]?i[e].push(n):i[e]=[n],t},t.once=function(e,n){return n._once=!0,t.on(e,n),t},t.off=function(e,n){var r=arguments.length;if(1===r)delete i[e];else if(0===r)i={};else{var o=i[e];if(!o)return t;o.splice(o.indexOf(n),1)}return t},t.emit=function(){var e=o(arguments);return t.emitterSnapshot(e.shift()).apply(this,e)},t.emitterSnapshot=function(e){var r=(i[e]||[]).slice(0);return function(){var s=o(arguments),u=this||t;if("error"===e&&n.throws!==!1&&!r.length)throw 1===s.length?s[0]:s;return i[e]=r.filter(function(t){return n.async?a(t,s,u):t.apply(u,s),!t._once}),t}},t}var s,u=""+r,c="function"==typeof setImmediate;s=c?function(t){setImmediate(t)}:typeof t!==u&&t.nextTick?t.nextTick:function(t){setTimeout(t,0)},typeof e!==u&&e.exports?e.exports=i:(n.contra=n.contra||{},n.contra.emitter=i)}(this)}).call(this,t("FWaASH"))},{FWaASH:1}],9:[function(t,e){(function(t){"use strict";function n(t,e,n,r){return t.addEventListener(e,n,r)}function r(t,e,n,r){return t.attachEvent("on"+e,u(t,e,n),r)}function o(t,e,n,r){return t.removeEventListener(e,n,r)}function a(t,e,n,r){return t.detachEvent("on"+e,c(t,e,n),r)}function i(t,e){var n=document.createEvent("Event");n.initEvent(e,!0,!0),t.dispatchEvent(n)}function s(e,n,r){return function(n){var o=n||t.event;o.target=o.target||o.srcElement,o.preventDefault=o.preventDefault||function(){o.returnValue=!1},o.stopPropagation=o.stopPropagation||function(){o.cancelBubble=!0},r.call(e,o)}}function u(t,e,n){var r=c(t,e,n)||s(t,e,n);return m.push({wrapper:r,element:t,type:e,fn:n}),r}function c(t,e,n){var r=l(t,e,n);if(r){var o=m[r].wrapper;return m.splice(r,1),o}}function l(t,e,n){var r,o;for(r=0;r<m.length;r++)if(o=m[r],o.element===t&&o.type===e&&o.fn===n)return r}var d=n,f=o,m=[];t.addEventListener||(d=r,f=a),e.exports={add:d,remove:f,fabricate:i}}).call(this,"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{}],10:[function(t,e){"use strict";function n(t,e){var n=u[t.id];return n&&n[e.id]}function r(t,e){var n=u[t.id];n||(n=u[t.id]={});var r=a(e);n[e.id]=r,t.on("data",r),t.on("destroyed",o.bind(null,t,e))}function o(t,e){var n=u[t.id];if(n){var r=n[e.id];t.off("data",r),delete n[e.id]}}function a(t){return function(){t.refresh()}}function i(t,e){s(e.associated)||n(t,e)||r(t,e)}var s=t("./isInput"),u={};e.exports={add:i,remove:o}},{"./isInput":20}],11:[function(t,e){"use strict";function n(t){function e(){return Fe}function n(n){return le=l(n||t,Fe),me||(me=i({className:le.styles.container})),pe=le.weekdayFormat,ye=pe.length,ve=r,he=r,ge=r,we=r,le.appendTo.appendChild(me),U(me),Ce=!1,de=le.initialValue?le.initialValue:d.moment(),fe=de.clone(),Fe.container=me,Fe.destroyed=!1,Fe.destroy=y.bind(Fe,!1),Fe.emitValues=z,Fe.getDate=se,Fe.getDateString=ue,Fe.getMoment=ce,Fe.hide=O,Fe.options=v,Fe.options.reset=g,Fe.refresh=X,Fe.restore=e,Fe.setValue=_,Fe.show=F,h(),p(),Fe}function p(){Fe.emit("ready",c(le))}function y(t){me&&me.parentNode.removeChild(me),le&&h(!0);var r=Fe.emitterSnapshot("destroyed");return Fe.destroyed=!0,Fe.destroy=e,Fe.emitValues=e,Fe.getDate=m,Fe.getDateString=m,Fe.getMoment=m,Fe.hide=e,Fe.options=e,Fe.options.reset=e,Fe.refresh=e,Fe.restore=n,Fe.setValue=e,Fe.show=e,Fe.off(),t!==!0&&r(),Fe}function h(t){var e=t?"remove":"add";le.autoHideOnBlur&&o[e](document.documentElement,"focus",M,!0),le.autoHideOnClick&&o[e](document,"click",j)}function v(t){return 0===arguments.length?c(le):(y(),n(t),Fe)}function g(){return v({appendTo:le.appendTo})}function w(){Ce||(Ce=!0,b(),x(),Fe.emit("render"))}function b(){function t(t){var e=i({className:le.styles.month,parent:be});0===t&&(xe=i({type:"button",className:le.styles.back,attributes:{type:"button"},parent:e})),t===le.monthsInCalendar-1&&(Ee=i({type:"button",className:le.styles.next,attributes:{type:"button"},parent:e}));var n,r=i({className:le.styles.monthLabel,parent:e}),o=i({type:"table",className:le.styles.dayTable,parent:e}),a=i({type:"thead",className:le.styles.dayHead,parent:o}),s=i({type:"tr",className:le.styles.dayRow,parent:a}),u=i({type:"tbody",className:le.styles.dayBody,parent:o});for(n=0;ye>n;n++)i({type:"th",className:le.styles.dayHeadElem,parent:s,text:pe[E(n)]});u.setAttribute(Ae,t),Ne.push({label:r,body:u})}if(le.date){var e;for(Ne=[],be=i({className:le.styles.date,parent:me}),e=0;e<le.monthsInCalendar;e++)t(e);o.add(xe,"click",H),o.add(Ee,"click",L),o.add(be,"click",ne)}}function x(){if(le.time&&le.timeInterval){var t=i({className:le.styles.time,parent:me});ke=i({className:le.styles.selectedTime,parent:t,text:de.format(le.timeFormat)}),o.add(ke,"click",T),Te=i({className:le.styles.timeList,parent:t}),o.add(Te,"click",ie);for(var e=d.moment("00:00:00","HH:mm:ss"),n=e.clone().add(1,"days");e.isBefore(n);)i({className:le.styles.timeOption,parent:Te,text:e.format(le.timeFormat)}),e.add(le.timeInterval,"seconds")}}function E(t,e){var n=e?-1:1,r=t+le.weekStart*n;return(r>=ye||0>r)&&(r+=ye*-n),r}function k(){if(le.time&&Ce){var t,e,n,r,o=Te.children,a=o.length;for(r=0;a>r;r++)n=o[r],e=d.moment(s(n),le.timeFormat),t=ae(de.clone(),e),n.style.display=J(t,!1,le.timeValidator)?"block":"none"}}function T(t){var e="boolean"==typeof t?t:"none"===Te.style.display;e?C():A()}function C(){Te&&(Te.style.display="block")}function A(){Te&&(Te.style.display="none")}function N(){me.style.display="inline-block",Fe.emit("show")}function I(){me.style.display="none",Fe.emit("hide")}function F(){return w(),X(),T(!le.date),N(),Fe}function O(){return A(),setTimeout(I,0),Fe}function S(){A();var t=f.contains(me,le.styles.positioned);return t&&setTimeout(I,0),Fe}function D(t){var e=t.target;if(e===Fe.associated)return!0;for(;e;){if(e===me)return!0;e=e.parentNode}}function M(t){D(t)||S()}function j(t){D(t)||S()}function H(){B("subtract")}function L(){B("add")}function B(t){var e,n="add"===t?-1:1,r=le.monthsInCalendar+n*oe(we);fe[t](r,"months"),e=Z(fe.clone()),de=e||de,e&&(fe=e.clone()),V()}function V(t){P(),q(),t!==!0&&z(),k()}function P(){function t(t,e){var n=fe.clone().add(e,"months");s(t.label,n.format(le.monthFormat)),U(t.body)}if(le.date&&Ce){var e=fe.year(),n=fe.month(),r=fe.date();if(r!==ge||n!==ve||e!==he){var o=Y();if(ge=fe.date(),ve=fe.month(),he=fe.year(),o)return R(),void 0;Ne.forEach(t),$()}}}function R(){function t(t){var e,n=[];for(e=0;e<t.length;e++)n.push(t[e]);return n}function e(e){return t(e.children)}function n(t){return!f.contains(t,le.styles.dayPrevMonth)&&!f.contains(t,le.styles.dayNextMonth)}var r=fe.date()-1;re(!1),Ne.forEach(function(o){var a;W(o.date,fe)&&(a=t(o.body.children).map(e),a=Array.prototype.concat.apply([],a).filter(n),re(a[r]))})}function Y(){function t(t){return he?W(t.date,fe):!1}return Ne.some(t)}function W(t,e){return t&&e&&t.year()===e.year()&&t.month()===e.month()}function q(){le.time&&Ce&&s(ke,de.format(le.timeFormat))}function z(){return Fe.emit("data",ue()),Fe.emit("year",de.year()),Fe.emit("month",de.month()),Fe.emit("day",de.day()),Fe.emit("time",de.format(le.timeFormat)),Fe}function X(){return he=!1,ve=!1,ge=!1,V(!0),Fe}function _(t){var e=u(t,le.inputFormat);if(null!==e)return de=Z(e)||de,fe=de.clone(),V(!0),Fe}function U(t,e){for(;t&&t.firstChild;)t.removeChild(t.firstChild);e===!0&&t.parentNode.removeChild(t)}function $(){var t;for(t=0;t<le.monthsInCalendar;t++)G(t)}function G(t){function e(t){var e,r,o;for(e=0;e<t.length;e++)f.children.length===ye&&(f=i({type:"tr",className:le.styles.dayRow,parent:a.body})),r=t.base.clone().add(e,"days"),o=i({type:"td",parent:f,text:r.format(le.dayFormat),className:n(r,t.cell.join(" ").split(" ")).join(" ")}),t.selectable&&r.date()===c&&re(o)}function n(t,e){return J(t,!0,le.dateValidator)||e.push(y),e}function r(t,e){return t&&e.push(le.styles.dayConcealed),e}var o,a=Ne[t],s=fe.clone().add(t,"months"),u=s.daysInMonth(),c=s.month()!==de.month()?-1:de.date(),l=s.clone().date(1),d=E(l.day(),!0),f=i({type:"tr",className:le.styles.dayRow,parent:a.body}),m=r(0!==t,[le.styles.dayBodyElem,le.styles.dayPrevMonth]),p=r(t!==le.monthsInCalendar-1,[le.styles.dayBodyElem,le.styles.dayNextMonth]),y=le.styles.dayDisabled;e({base:l.clone().subtract(d,"days"),length:d,cell:m}),e({base:l.clone(),length:u,cell:[le.styles.dayBodyElem],selectable:!0}),o=l.clone().add(u,"days"),e({base:o,length:ye-f.children.length,cell:p}),xe.disabled=!K(l,!0),Ee.disabled=!Q(o,!0),a.date=s.clone()}function J(t,e,n){if(!K(t,e))return!1;if(!Q(t,e))return!1;var r=(n||Function.prototype).call(Fe,t.toDate());return r!==!1}function K(t,e){var n=le.min?e?le.min.clone().startOf("day"):le.min:!1;return!n||!t.isBefore(n)}function Q(t,e){var n=le.max?e?le.max.clone().endOf("day"):le.max:!1;return!n||!t.isAfter(n)}function Z(t){if(le.min&&t.isBefore(le.min))return Z(le.min.clone());if(le.max&&t.isAfter(le.max))return Z(le.max.clone());var e=t.clone().subtract(1,"days");return ee(e,t,"add")?te(e):(e=t.clone(),ee(e,t,"subtract")?te(e):void 0)}function te(t){var e,n=t.clone().subtract(le.timeInterval,"seconds"),r=Math.ceil(Ie/le.timeInterval);for(e=0;r>e;e++)if(n.add(le.timeInterval,"seconds"),n.date()>t.date()&&n.subtract(1,"days"),le.timeValidator.call(Fe,n.toDate())!==!1)return n}function ee(t,e,n){for(var r=!1;r===!1&&(t[n](1,"days"),t.month()===e.month());)r=le.dateValidator.call(Fe,t.toDate());return r!==!1}function ne(t){var e=t.target;if(!f.contains(e,le.styles.dayDisabled)&&f.contains(e,le.styles.dayBodyElem)){var n=parseInt(s(e),10),r=f.contains(e,le.styles.dayPrevMonth),o=f.contains(e,le.styles.dayNextMonth),a=oe(e)-oe(we);de.add(a,"months"),(r||o)&&de.add(r?-1:1,"months"),re(e),de.date(n),ae(de,Z(de)||de),fe=de.clone(),le.autoClose===!0&&S(),V()}}function re(t){we&&f.remove(we,le.styles.selectedDay),t&&f.add(t,le.styles.selectedDay),we=t}function oe(t){for(var e;t&&t.getAttribute;){if(e=t.getAttribute(Ae),"string"==typeof e)return parseInt(e,10);t=t.parentNode}return 0}function ae(t,e){return t.hour(e.hour()).minute(e.minute()).second(e.second()),t}function ie(t){var e=t.target;if(f.contains(e,le.styles.timeOption)){var n=d.moment(s(e),le.timeFormat);ae(de,n),fe=de.clone(),z(),q(),!le.date&&le.autoClose===!0||"time"===le.autoClose?S():A()}}function se(){return de.toDate()}function ue(t){return de.format(t||le.inputFormat)}function ce(){return de.clone()}var le,de,fe,me,pe,ye,he,ve,ge,we,be,xe,Ee,ke,Te,Ce=!1,Ae="data-rome-offset",Ne=[],Ie=86400,Fe=a({associated:t.associated});return n(),setTimeout(p,0),Fe}var r,o=t("crossvent"),a=t("contra.emitter"),i=t("./dom"),s=t("./text"),u=t("./parse"),c=t("./clone"),l=t("./defaults"),d=t("./momentum"),f=t("./classes"),m=t("./noop");e.exports=n},{"./classes":12,"./clone":13,"./defaults":15,"./dom":16,"./momentum":21,"./noop":22,"./parse":23,"./text":35,"contra.emitter":7,crossvent:9}],12:[function(t,e){"use strict";function n(t){return t.className.replace(s,"").split(u)}function r(t,e){t.className=e.join(" ")}function o(t,e){var n=a(t,e);n.push(e),r(t,n)}function a(t,e){var o=n(t),a=o.indexOf(e);return-1!==a&&(o.splice(a,1),r(t,o)),o}function i(t,e){return-1!==n(t).indexOf(e)}var s=/^\s+|\s+$/g,u=/\s+/;e.exports={add:o,remove:a,contains:i}},{}],13:[function(t,e){"use strict";function n(t){var e,o={};for(var a in t)e=t[a],o[a]=e?r.isMoment(e)?e.clone():e._isStylesConfiguration?n(e):e:e;return o}var r=t("./momentum");e.exports=n},{"./momentum":21}],14:[function(t,e){"use strict";function n(t,e){var n,s=r.find(t);return s?s:(n=i(t)?o(t,e):a(t,e),r.assign(t,n),n)}var r=t("./index"),o=t("./input"),a=t("./inline"),i=t("./isInput");e.exports=n},{"./index":17,"./inline":18,"./input":19,"./isInput":20}],15:[function(t,e){"use strict";function n(t,e){var n,i,s=t||{};if(s.autoHideOnClick===i&&(s.autoHideOnClick=!0),s.autoHideOnBlur===i&&(s.autoHideOnBlur=!0),s.autoClose===i&&(s.autoClose=!0),s.appendTo===i&&(s.appendTo=document.body),"parent"===s.appendTo){if(!o(e.associated))throw new Error("Inline calendars must be appended to a parent node explicitly.");s.appendTo=e.associated.parentNode}if(s.invalidate===i&&(s.invalidate=!0),s.required===i&&(s.required=!1),s.date===i&&(s.date=!0),s.time===i&&(s.time=!0),s.date===!1&&s.time===!1)throw new Error("At least one of `date` or `time` must be `true`.");if(s.inputFormat===i&&(s.inputFormat=s.date&&s.time?"YYYY-MM-DD HH:mm":s.date?"YYYY-MM-DD":"HH:mm"),s.initialValue=s.initialValue===i?null:r(s.initialValue,s.inputFormat),s.min=s.min===i?null:r(s.min,s.inputFormat),s.max=s.max===i?null:r(s.max,s.inputFormat),s.timeInterval===i&&(s.timeInterval=1800),s.min&&s.max)if(s.max.isBefore(s.min)&&(n=s.max,s.max=s.min,s.min=n),s.date===!0){if(s.max.clone().subtract(1,"days").isBefore(s.min))throw new Error("`max` must be at least one day after `min`")}else if(1e3*s.timeInterval-s.min%(1e3*s.timeInterval)>s.max-s.min)throw new Error("`min` to `max` range must allow for at least one time option that matches `timeInterval`");if(s.dateValidator===i&&(s.dateValidator=Function.prototype),s.timeValidator===i&&(s.timeValidator=Function.prototype),s.timeFormat===i&&(s.timeFormat="HH:mm"),s.weekStart===i&&(s.weekStart=a.moment().weekday(0).day()),s.weekdayFormat===i&&(s.weekdayFormat="min"),"long"===s.weekdayFormat)s.weekdayFormat=a.moment.weekdays();else if("short"===s.weekdayFormat)s.weekdayFormat=a.moment.weekdaysShort();else if("min"===s.weekdayFormat)s.weekdayFormat=a.moment.weekdaysMin();else if(!Array.isArray(s.weekdayFormat)||s.weekdayFormat.length<7)throw new Error("`weekdays` must be `min`, `short`, or `long`");s.monthsInCalendar===i&&(s.monthsInCalendar=1),s.monthFormat===i&&(s.monthFormat="MMMM YYYY"),s.dayFormat===i&&(s.dayFormat="DD"),s.styles===i&&(s.styles={}),s.styles._isStylesConfiguration=!0;var u=s.styles;return u.back===i&&(u.back="rd-back"),u.container===i&&(u.container="rd-container"),u.positioned===i&&(u.positioned="rd-container-attachment"),u.date===i&&(u.date="rd-date"),u.dayBody===i&&(u.dayBody="rd-days-body"),u.dayBodyElem===i&&(u.dayBodyElem="rd-day-body"),u.dayPrevMonth===i&&(u.dayPrevMonth="rd-day-prev-month"),u.dayNextMonth===i&&(u.dayNextMonth="rd-day-next-month"),u.dayDisabled===i&&(u.dayDisabled="rd-day-disabled"),u.dayConcealed===i&&(u.dayConcealed="rd-day-concealed"),u.dayHead===i&&(u.dayHead="rd-days-head"),u.dayHeadElem===i&&(u.dayHeadElem="rd-day-head"),u.dayRow===i&&(u.dayRow="rd-days-row"),u.dayTable===i&&(u.dayTable="rd-days"),u.month===i&&(u.month="rd-month"),u.monthLabel===i&&(u.monthLabel="rd-month-label"),u.next===i&&(u.next="rd-next"),u.selectedDay===i&&(u.selectedDay="rd-day-selected"),u.selectedTime===i&&(u.selectedTime="rd-time-selected"),u.time===i&&(u.time="rd-time"),u.timeList===i&&(u.timeList="rd-time-list"),u.timeOption===i&&(u.timeOption="rd-time-option"),s}var r=t("./parse"),o=t("./isInput"),a=t("./momentum");e.exports=n},{"./isInput":20,"./momentum":21,"./parse":23}],16:[function(t,e){"use strict";function n(t){var e=t||{};e.type||(e.type="div");var n=document.createElement(e.type);return e.className&&(n.className=e.className),e.text&&(n.innerText=n.textContent=e.text),e.attributes&&Object.keys(e.attributes).forEach(function(t){n.setAttribute(t,e.attributes[t])}),e.parent&&e.parent.appendChild(n),n}e.exports=n},{}],17:[function(t,e){"use strict";function n(t){if("number"!=typeof t&&t&&t.getAttribute)return n(t.getAttribute(a));var e=i[t];return e!==o?e:null}function r(t,e){t.setAttribute(a,e.id=i.push(e)-1)}var o,a="data-rome-id",i=[];e.exports={find:n,assign:r}},{}],18:[function(t,e){"use strict";function n(t,e){var n=e||{};n.appendTo=t,n.associated=t;var o=r(n);return o.show(),o}var r=t("./calendar");e.exports=n},{"./calendar":11}],19:[function(t,e){"use strict";function n(t,e){function n(e){b=i(e||b,T),c.add(T.container,b.styles.positioned),r.add(T.container,"mousedown",m),r.add(T.container,"click",f),T.getDate=w(T.getDate),T.getDateString=w(T.getDateString),T.getMoment=w(T.getMoment),b.initialValue&&(t.value=b.initialValue.format(b.inputFormat)),k=o(T.container,t),T.on("data",v),T.on("show",k.refresh),d(),C()}function l(){d(!0),k.destroy(),k=null}function d(e){var o=e?"remove":"add";r[o](t,"click",y),r[o](t,"touchend",y),r[o](t,"focusin",y),r[o](t,"change",C),r[o](t,"keypress",C),r[o](t,"keydown",C),r[o](t,"input",C),b.invalidate&&r[o](t,"blur",p),e?(T.once("ready",n),T.off("destroyed",l)):(T.off("ready",n),T.once("destroyed",l))}function f(){E=!0,t.focus(),E=!1}function m(){function t(){x=!1}x=!0,setTimeout(t,0)}function p(){x||g()||T.emitValues()}function y(){E||T.show()}function h(){var e=t.value.trim();if(!g()){var n=u.moment(e,b.inputFormat,b.strictParse);T.setValue(n)}}function v(e){t.value=e}function g(){return b.required===!1&&""===t.value.trim()}function w(t){return function(){return g()?null:t.apply(this,arguments)}}var b=e||{};b.associated=t;var x,E,k,T=s(b),C=a(h,30);return n(b),T}var r=t("crossvent"),o=t("bullseye"),a=t("./throttle"),i=(t("./clone"),t("./defaults")),s=t("./calendar"),u=t("./momentum"),c=t("./classes");e.exports=n},{"./calendar":11,"./classes":12,"./clone":13,"./defaults":15,"./momentum":21,"./throttle":36,bullseye:2,crossvent:9}],20:[function(t,e){"use strict";function n(t){return t&&t.nodeName&&"input"===t.nodeName.toLowerCase()}e.exports=n},{}],21:[function(t,e){"use strict";function n(t){return t&&Object.prototype.hasOwnProperty.call(t,"_isAMomentObject")}var r={moment:null,isMoment:n};e.exports=r},{}],22:[function(t,e){"use strict";function n(){}e.exports=n},{}],23:[function(t,e){"use strict";function n(t,e){return"string"==typeof t?o.moment(t,e):"[object Date]"===Object.prototype.toString.call(t)?o.moment(t):o.isMoment(t)?t.clone():void 0}function r(t,e){var r=n(t,"string"==typeof e?e:null);return r&&r.isValid()?r:null}var o=t("./momentum");e.exports=r},{"./momentum":21}],24:[function(){"use strict";Array.prototype.filter||(Array.prototype.filter=function(t,e){var n=[];return this.forEach(function(r,o,a){t.call(e,r,o,a)&&n.push(r)},e),n})},{}],25:[function(){"use strict";Array.prototype.forEach||(Array.prototype.forEach=function(t,e){if(void 0===this||null===this||"function"!=typeof t)throw new TypeError;for(var n=this,r=n.length,o=0;r>o;o++)o in n&&t.call(e,n[o],o,n)})},{}],26:[function(){"use strict";Array.prototype.indexOf||(Array.prototype.indexOf=function(t,e){if(void 0===this||null===this)throw new TypeError;var n=this.length;for(e=+e||0,1/0===Math.abs(e)?e=0:0>e&&(e+=n,0>e&&(e=0));n>e;e++)if(this[e]===t)return e;return-1})},{}],27:[function(){"use strict";Array.isArray||(Array.isArray=function(t){return""+t!==t&&"[object Array]"===Object.prototype.toString.call(t)})},{}],28:[function(){"use strict";Array.prototype.map||(Array.prototype.map=function(t,e){var n,r,o;if(null==this)throw new TypeError("this is null or not defined");var a=Object(this),i=a.length>>>0;if("function"!=typeof t)throw new TypeError(t+" is not a function");for(arguments.length>1&&(n=e),r=new Array(i),o=0;i>o;)o in a&&(r[o]=t.call(n,a[o],o,a)),o++;return r})},{}],29:[function(){"use strict";Array.prototype.some||(Array.prototype.some=function(t,e){var n,r;if(null==this)throw new TypeError("this is null or not defined");var o=Object(this),a=o.length>>>0;if("function"!=typeof t)throw new TypeError(t+" is not a function");for(arguments.length>1&&(n=e),r=0;a>r;){if(r in o){var i=t.call(n,o[r],r,o);if(i)return!0}r++}return!1})},{}],30:[function(){"use strict";Function.prototype.bind||(Function.prototype.bind=function(t){if("function"!=typeof this)throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");var e=Array.prototype.slice.call(arguments,1),n=this,r=function(){},o=function(){var o=this instanceof r&&t?this:t,a=e.concat(Array.prototype.slice.call(arguments));return n.apply(o,a)};return r.prototype=this.prototype,o.prototype=new r,o})},{}],31:[function(){"use strict";var t=Object.prototype.hasOwnProperty,e=!{toString:null}.propertyIsEnumerable("toString"),n=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],r=n.length;Object.keys||(Object.keys=function(o){if("object"!=typeof o&&("function"!=typeof o||null===o))throw new TypeError("Object.keys called on non-object");var a,i,s=[];for(a in o)t.call(o,a)&&s.push(a);if(e)for(i=0;r>i;i++)t.call(o,n[i])&&s.push(n[i]);return s})},{}],32:[function(){"use strict";String.prototype.trim||(String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"")})},{}],33:[function(t,e){"use strict";t("./polyfills/function.bind"),t("./polyfills/array.foreach"),t("./polyfills/array.map"),t("./polyfills/array.filter"),t("./polyfills/array.isarray"),t("./polyfills/array.indexof"),t("./polyfills/array.some"),t("./polyfills/string.trim"),t("./polyfills/object.keys");var n=t("./core"),r=t("./index"),o=t("./use");n.use=o.bind(n),n.find=r.find,n.val=t("./validators"),e.exports=n},{"./core":14,"./index":17,"./polyfills/array.filter":24,"./polyfills/array.foreach":25,"./polyfills/array.indexof":26,"./polyfills/array.isarray":27,"./polyfills/array.map":28,"./polyfills/array.some":29,"./polyfills/function.bind":30,"./polyfills/object.keys":31,"./polyfills/string.trim":32,"./use":37,"./validators":38}],34:[function(t,e){(function(n){var r=t("./rome"),o=t("./momentum");if(r.use(n.moment),void 0===o.moment)throw new Error("rome depends on moment.js, you can get it at http://momentjs.com, or you could use the bundled distribution file instead.");e.exports=r}).call(this,"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})},{"./momentum":21,"./rome":33}],35:[function(t,e){"use strict";function n(t,e){return 2===arguments.length&&(t.innerText=t.textContent=e),t.innerText||t.textContent}e.exports=n},{}],36:[function(t,e){"use strict";e.exports=function(t,e){var n,r=-1/0;return function(){function o(){clearTimeout(n),n=null;var a=r+e,i=+new Date;i>a?(r=i,t.apply(this,arguments)):n=setTimeout(o,a-i)}n||o()}}},{}],37:[function(t,e){"use strict";function n(t){this.moment=r.moment=t}var r=t("./momentum");e.exports=n},{"./momentum":21}],38:[function(t,e){"use strict";function n(t){return function(e){var n=a(e);return function(r){var s=o.find(e),u=a(r),c=n||s&&s.getMoment();return c?(s&&i.add(this,s),t(u,c)):!0}}}function r(t,e){return function(n,r){function s(t){var e,n,r=o.find(t);return r?e=n=r.getMoment():Array.isArray(t)?(e=t[0],n=t[1]):e=n=t,r&&i.add(r,this),{start:a(e).startOf("day").toDate(),end:a(n).endOf("day").toDate()}}var u,c=arguments.length;return Array.isArray(n)?u=n:1===c?u=[n]:2===c&&(u=[[n,r]]),function(n){return u.map(s.bind(this))[t](e.bind(this,n))}}}var o=t("./index"),a=t("./parse"),i=t("./association"),s=n(function(t,e){return t>=e}),u=n(function(t,e){return t>e}),c=n(function(t,e){return e>=t}),l=n(function(t,e){return e>t}),d=r("every",function(t,e){return e.start>t||e.end<t}),f=r("some",function(t,e){return e.start<=t&&e.end>=t});e.exports={afterEq:s,after:u,beforeEq:c,before:l,except:d,only:f}},{"./association":10,"./index":17,"./parse":23}]},{},[34])(34)});
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = {
 	tsdbHost : 'http://192.168.1.113',
     tsdbPort : '4242'
 }
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = {
     TSDB_ENDPOINTS: {
         s: '/s',
@@ -52480,7 +56487,7 @@ module.exports = {
         logs: '/logs?json'
     }
 }
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var self = module.exports = {
@@ -52492,7 +56499,7 @@ var self = module.exports = {
     //common stuffs
     header: 'public/view/common/header.html',
 }
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = function(selector) {
     return {
         dygraph: {},
@@ -52500,7 +56507,7 @@ module.exports = function(selector) {
        	highchart: {}
     };
 }
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var self = module.exports = {};
@@ -52512,7 +56519,7 @@ self.error = function() {
     console.error(arguments);
     self._errors.push(arguments);
 }
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // 'use strict';
 var origAppConfig = require('./appconfig');
 
@@ -52529,6 +56536,7 @@ window.horsey = require('horsey/dist/horsey.min.js');//autocomplete
 var angular = require('angular');
 require('angular-route');
 require('angular-resource');
+require('angular-chartist.js/dist/angular-chartist.min.js');
 
 
 //mine
@@ -52709,6 +56717,13 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
         [1, 3, 4, 5, 6]
       ]
     }
+
+    $scope.chartistOption = {
+        fullWidth: true,
+        chartPadding: {
+            right: 40
+        }
+    };
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
     $scope.logs = 'loading';
@@ -52728,4 +56743,4 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
 });
 
 
-},{"./appconfig":13,"./constant/constant":14,"./constant/viewconstant":15,"./lib/graphnormalizer.js":16,"./lib/logger":17,"angular":6,"angular-resource":2,"angular-route":4,"horsey/dist/horsey.min.js":7,"insignia/dist/insignia.min.js":8,"jquery":9,"lodash":10,"moment":11,"rome/dist/rome.standalone.min.js":12}]},{},[18])
+},{"./appconfig":15,"./constant/constant":16,"./constant/viewconstant":17,"./lib/graphnormalizer.js":18,"./lib/logger":19,"angular":7,"angular-chartist.js/dist/angular-chartist.min.js":1,"angular-resource":3,"angular-route":5,"horsey/dist/horsey.min.js":9,"insignia/dist/insignia.min.js":10,"jquery":11,"lodash":12,"moment":13,"rome/dist/rome.standalone.min.js":14}]},{},[20])
