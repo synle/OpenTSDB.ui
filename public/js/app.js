@@ -56464,7 +56464,7 @@ return jQuery;
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],15:[function(require,module,exports){
 module.exports = {
-	tsdbHost : 'http://192.168.1.113',
+	tsdbHost : 'http://192.168.1.108',
     tsdbPort : '4242'
 }
 },{}],16:[function(require,module,exports){
@@ -56500,14 +56500,67 @@ var self = module.exports = {
     header: 'public/view/common/header.html',
 }
 },{}],18:[function(require,module,exports){
-module.exports = function(selector) {
-    return {
-        dygraph: {},
-        chartjs: {},
-       	highchart: {}
+'use strict';
+var Logger = require('./logger');
+module.exports = function() {
+    var commonNormalizerUtil = {
+        getTimestampHash: function(tsdbData) {
+            var hashTimestamp = {};
+            _.forEach(tsdbData, function(tsdbDatum) {
+                _.forEach(tsdbDatum.dps, function(dpsVal, timestamp) {
+                    hashTimestamp[timestamp] = true;
+                });
+            });
+            return Object.keys(hashTimestamp);
+        },
+        getFormattedTimestamp: function(timestamps, option) {
+            var formattedTimestamps = [];
+            _.forEach(timestamps, function(ts) {
+                formattedTimestamps.push(
+                  ts //to be formatted stuffs here
+                );
+            });
+            return formattedTimestamps;
+        }
     };
-}
-},{}],19:[function(require,module,exports){
+    return {
+        _util: commonNormalizerUtil,
+        // dygraph: {},
+        // chartjs: {},
+        // highchart: {},
+        chartist: {
+            normalize: function(tsdbData) {
+                var convertedData = {
+                  labels : [],
+                  series : []
+                };
+                var uniqueTimestamps = commonNormalizerUtil.getTimestampHash(tsdbData);
+
+                //log for testing
+                Logger.log(uniqueTimestamps);
+
+                //put in formatted timestamps
+                convertedData.labels = commonNormalizerUtil.getFormattedTimestamp(uniqueTimestamps);
+                convertedData.series = [];
+
+
+                //fill in the series skeleton
+                _.forEach(uniqueTimestamps, function(ts, tsIdx){
+                  _.forEach(tsdbData, function(tsdbDatum, idx){
+                    convertedData.series[idx] = convertedData.series[idx] || [];
+                    convertedData.series[idx][tsIdx] = tsdbDatum.dps[ts] || null;
+                  });
+                });
+
+                //fill in the number
+                Logger.log(convertedData);                
+
+                return convertedData;
+            }
+        }
+    };
+}();
+},{"./logger":19}],19:[function(require,module,exports){
 'use strict';
 
 var self = module.exports = {};
@@ -56541,7 +56594,7 @@ require('angular-chartist.js/dist/angular-chartist.min.js');
 
 //mine
 var Logger = require('./lib/logger');
-var GraphNormalizer = require('./lib/graphnormalizer.js');
+var GraphNormalizer = require('./lib/graphnormalizer').chartist;
 var ViewConstant = require('./constant/viewconstant');
 var Constant = require('./constant/constant');
 
@@ -56703,27 +56756,21 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
             $scope.query
         ).then(function(r){
             $scope.tsdbData = r;
+
+            //normalize the config
+            $scope.chartData = GraphNormalizer.normalize(r);
+
+            //dummy chart data
+            $scope.chartOption = {
+                fullWidth: true,
+                chartPadding: {
+                    right: 40
+                }
+            };
         }, function(r){
             Logger.error('query() failed', r);
         });
     }
-
-    //dummy chart data
-    $scope.chartistData = {
-      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      series: [
-        [12, 9, 7, 8, 5],
-        [2, 1, 3.5, 7, 3],
-        [1, 3, 4, 5, 6]
-      ]
-    }
-
-    $scope.chartistOption = {
-        fullWidth: true,
-        chartPadding: {
-            right: 40
-        }
-    };
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
     $scope.logs = 'loading';
@@ -56743,4 +56790,4 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
 });
 
 
-},{"./appconfig":15,"./constant/constant":16,"./constant/viewconstant":17,"./lib/graphnormalizer.js":18,"./lib/logger":19,"angular":7,"angular-chartist.js/dist/angular-chartist.min.js":1,"angular-resource":3,"angular-route":5,"horsey/dist/horsey.min.js":9,"insignia/dist/insignia.min.js":10,"jquery":11,"lodash":12,"moment":13,"rome/dist/rome.standalone.min.js":14}]},{},[20])
+},{"./appconfig":15,"./constant/constant":16,"./constant/viewconstant":17,"./lib/graphnormalizer":18,"./lib/logger":19,"angular":7,"angular-chartist.js/dist/angular-chartist.min.js":1,"angular-resource":3,"angular-route":5,"horsey/dist/horsey.min.js":9,"insignia/dist/insignia.min.js":10,"jquery":11,"lodash":12,"moment":13,"rome/dist/rome.standalone.min.js":14}]},{},[20])

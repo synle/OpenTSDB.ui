@@ -19,7 +19,7 @@ require('angular-chartist.js/dist/angular-chartist.min.js');
 
 //mine
 var Logger = require('./lib/logger');
-var GraphNormalizer = require('./lib/graphnormalizer.js');
+var GraphNormalizer = require('./lib/graphnormalizer').chartist;
 var ViewConstant = require('./constant/viewconstant');
 var Constant = require('./constant/constant');
 
@@ -181,27 +181,21 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
             $scope.query
         ).then(function(r){
             $scope.tsdbData = r;
+
+            //normalize the config
+            $scope.chartData = GraphNormalizer.normalize(r);
+
+            //dummy chart data
+            $scope.chartOption = {
+                fullWidth: true,
+                chartPadding: {
+                    right: 40
+                }
+            };
         }, function(r){
             Logger.error('query() failed', r);
         });
     }
-
-    //dummy chart data
-    $scope.chartistData = {
-      labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      series: [
-        [12, 9, 7, 8, 5],
-        [2, 1, 3.5, 7, 3],
-        [1, 3, 4, 5, 6]
-      ]
-    }
-
-    $scope.chartistOption = {
-        fullWidth: true,
-        chartPadding: {
-            right: 40
-        }
-    };
 })
 .controller('TsdbLogController', function($scope, TsdbClient) {
     $scope.logs = 'loading';
