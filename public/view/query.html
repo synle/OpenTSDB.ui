@@ -79,8 +79,6 @@
 	<div>
 		<h3>Chart Data</h3> <button class="btn btn-primary" ng-click="render()">Render</button><br />
 		<pre ng-if="tsdbData && tsdbData.length > 0">{{tsdbData}}</pre>
-		<div>
-			<chartist class="ct-chart" chartist-chart-type="Line" chartist-data="chartData" chartist-chart-options="chartOption"></chartist>
-		</div>
+		<div id='chartContainer'></div>
 	</div>
 </div>

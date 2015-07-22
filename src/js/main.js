@@ -19,7 +19,8 @@ require('angular-chartist.js/dist/angular-chartist.min.js');
 
 //mine
 var Logger = require('./lib/logger');
-var GraphNormalizer = require('./lib/graphnormalizer').chartist;
+// var GraphNormalizer = require('./lib/graphnormalizer').chartist;
+var GraphNormalizer = require('./lib/graphnormalizer').chartjs;
 var ViewConstant = require('./constant/viewconstant');
 var Constant = require('./constant/constant');
 
@@ -168,7 +169,7 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
     //initial
     $scope.refresh();
 })
-.controller('QueryController', function($scope, TsdbClient) {
+.controller('QueryController', function($scope, $compile, TsdbClient) {
     $scope.query = {"start":"1428768937000","end":"1429373737000","queries":[{"aggregator":"zimsum","metric":"proc.loadavg.15min","rate":false,"tags":{},"downsample":"60m-avg"},{"aggregator":"zimsum","metric":"proc.loadavg.1min","rate":false,"tags":{},"downsample":"60m-avg"},{"aggregator":"zimsum","metric":"proc.loadavg.5min","rate":false,"tags":{},"downsample":"60m-avg"}]};
     $scope.tsdbData = [];
 
@@ -182,16 +183,20 @@ angular.module('opentsdbnw', ['ngRoute', 'ngResource', 'angular-chartist'])
         ).then(function(r){
             $scope.tsdbData = r;
 
-            //normalize the config
-            $scope.chartData = GraphNormalizer.normalize(r);
+            //chartist
+            // <chartist class="ct-chart" chartist-chart-type="Line" chartist-data="chartData" chartist-chart-options="chartOption"></chartist>
+            // $scope.chartData = GraphNormalizer.normalize(r, '#chartContainer');
+            // $scope.chartOption = {};
+            
 
-            //dummy chart data
-            $scope.chartOption = {
-                fullWidth: true,
-                chartPadding: {
-                    right: 40
-                }
-            };
+            //chartjs
+            $scope.chartData = GraphNormalizer.normalize(r);
+            $scope.chartOption = {};
+            var ctx = $('#chartContainer').html('<canvas height="600" width="800" style="border:1px solid tomato;background-color:#eee"></canvas>').find('canvas')[0].getContext("2d");
+            var myLineChart = new Chart(ctx).Line(
+                $scope.chartData,
+                $scope.chartOption
+            );
         }, function(r){
             Logger.error('query() failed', r);
         });
